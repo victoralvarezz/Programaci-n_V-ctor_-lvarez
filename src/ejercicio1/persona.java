@@ -80,9 +80,7 @@ public class persona {
 		public abstract void hacerTurno(Personaje[] enemigos, Personaje[] aliados);
 	}
 
-	// =======================
-	// EQUIPO LUZ (BUENOS)
-	// =======================
+
 
 	// JEDI = Guerrero (tanque + daño estable)
 	// Ejemplo nombre: "Yoda"
