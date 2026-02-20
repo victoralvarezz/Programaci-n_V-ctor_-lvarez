@@ -108,7 +108,7 @@ public class persona {
 
 		@Override
 		public void hacerTurno(Personaje[] enemigos, Personaje[] aliados) {
-			// simple: dispara
+			// disparo normal 
 			System.out.println(nombre + " dispara blaster");
 			pegarA(primerVivo(enemigos), ataque);
 		}
