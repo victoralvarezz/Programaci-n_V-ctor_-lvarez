@@ -92,7 +92,7 @@ public class persona {
 
 		@Override
 		public void hacerTurno(Personaje[] enemigos, Personaje[] aliados) {
-			// simple: pega al primero vivo
+			// siempre pega al primero vivo
 			System.out.println(nombre + " usa sable de luz");
 			pegarA(primerVivo(enemigos), ataque);
 		}
