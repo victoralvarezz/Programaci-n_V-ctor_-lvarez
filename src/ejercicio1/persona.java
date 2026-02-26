@@ -81,7 +81,6 @@ public class persona {
 	}
 
 
-
 	// JEDI = Guerrero (tanque + daño estable)
 	// Ejemplo nombre: "Yoda"
 	public static class Jedi extends Personaje {
@@ -92,9 +91,18 @@ public class persona {
 
 		@Override
 		public void hacerTurno(Personaje[] enemigos, Personaje[] aliados) {
-			// siempre pega al primero vivo
-			System.out.println(nombre + " usa sable de luz");
-			pegarA(primerVivo(enemigos), ataque);
+			int vivos = contarVivos(enemigos);
+
+			// si hay 2+ enemigos y tiene mana, usa empujón de la Fuerza (área)
+			if (vivos >= 2 && mana >= 15) {
+				mana -= 15;
+				System.out.println(nombre + " usa Empujón de la Fuerza (área) (-15 mana)");
+				pegarATodos(enemigos, 10);
+			} else {
+				// si no, sable normal al primero vivo
+				System.out.println(nombre + " usa sable de luz");
+				pegarA(primerVivo(enemigos), ataque);
+			}
 		}
 	}
 
@@ -115,7 +123,7 @@ public class persona {
 	}
 
 	// SANADOR = Sacerdote (cura al aliado más débil)
-	//Seria  "Leia"
+	// Seria "Leia"
 	public static class Sanador extends Personaje {
 
 		public Sanador(String nombre) {
@@ -127,14 +135,14 @@ public class persona {
 
 			Personaje aliado = aliadoMasDebil(aliados);
 
-			// si alguien tiene poca vida -> cura(+12)
+			// si alguien tiene poca vida -> cura(+20)
 			if (aliado != null && aliado.vida < 70 && mana >= 12) {
 				System.out.println(nombre + " cura a " + aliado.nombre);
 				mana -= 12;
 				aliado.vida += 20;
 				System.out.println("   -> " + aliado.nombre + " ahora tiene " + aliado.vida + " | Mana: " + mana);
 			} else {
-				// si no, haced daño 10 
+				// si no, hace daño 10
 				System.out.println(nombre + " golpea débilmente");
 				pegarA(primerVivo(enemigos), 10);
 			}
@@ -156,7 +164,7 @@ public class persona {
 	}
 
 
-	// SITH = Guerrero oscuro ataque a dos personnas
+	// SITH = Guerrero oscuro ataque a dos personas
 	// Ejemplo nombre: "Darth Vader" (aplastamiento con la Fuerza)
 	public static class Sith extends Personaje {
 
@@ -169,7 +177,7 @@ public class persona {
 
 			int vivos = contarVivos(enemigos);
 
-			// para dos enemigos en area 
+			// si hay 2+ enemigos y tiene mana, usa fuerza oscura (área)
 			if (vivos >= 2 && mana >= 10) {
 				mana -= 10;
 				System.out.println(nombre + " usa fuerza oscura (área) (-10 mana)");
@@ -197,8 +205,8 @@ public class persona {
 	}
 
 	// CAZARRECOMPENSAS = mago
-	// Ejemplo nombre:"Boba Fett"  tengo que añadir la clase (quemadura)
-	// nota :  quema -5 para el estado 
+	// Ejemplo nombre: "Boba Fett" tengo que añadir la clase (quemadura)
+	// nota: quema -5 para el estado 
 	public static class Cazarrecompensas extends Personaje {
 
 		public Cazarrecompensas(String nombre) {
@@ -224,5 +232,4 @@ public class persona {
 		}
 	}
 
-	
 }
