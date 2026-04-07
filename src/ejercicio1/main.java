@@ -10,7 +10,7 @@ import java.util.Scanner;
  * de la partida. Usa un HashMap para el catalogo de personajes disponibles.
  *
  * @author Victor
- * @version 1.0
+ * @version 1.0 
  */
 public class main {
 
