@@ -13,4 +13,4 @@ public abstract class Estado {
 
 	// cada estado aplica su efecto cada una el suyo
 	public abstract void aplicarEfecto(persona.Personaje objetivo);
-}
+} 
