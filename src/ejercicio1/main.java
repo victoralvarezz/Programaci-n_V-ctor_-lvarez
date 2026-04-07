@@ -165,7 +165,7 @@ public class main {
 			int op = leerEntero(1, 4);
 			if (op == 1)
 				p.ataqueBasico(elegirObjetivo(enemigos));
-			else if (op == 2)
+			else if (op == 2) 
 				p.usarEmpujon(enemigos);
 			else if (op == 3)
 				p.usarAplastamiento(elegirObjetivo(enemigos));
