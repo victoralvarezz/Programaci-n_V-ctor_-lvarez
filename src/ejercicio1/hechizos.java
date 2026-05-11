@@ -187,9 +187,9 @@ public abstract class hechizos {
 			if (obj == null || !obj.estaVivo())
 				return;
 			System.out.println(lanzador.nombre + " usa Curacion sobre " + obj.nombre + " (-10 mana)");
-			obj.vida += 25;
-			if (obj.vida > obj.vidaMax)
-				obj.vida = obj.vidaMax;
+			// Se usa curar para que la clase persona controle la vida maxima.
+			// Asi no tocamos obj.vida ni obj.vidaMax directamente desde aqui.
+			obj.curar(25);
 			System.out.println("   -> " + obj.nombre + " queda con vida " + obj.vida);
 		}
 	}

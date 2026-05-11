@@ -1,44 +1,42 @@
 package ejercicio1;
 
 /**
- * Clase abstracta que representa un estado persistente aplicado a un personaje.
- * Un estado tiene una duracion en turnos y aplica un efecto (daño o curacion)
- * cada ronda hasta que expira. Las subclases concretas son Quemaduras, Veneno y
- * Senadora (Renovar).
- *
- * @author Victor
- * @version 1.0
+ * Clase abstracta que representa un estado aplicado a un personaje.
  */
 public abstract class Estado {
 
-	/** Nombre del estado que se muestra en combate. */
+	// Guarda el nombre del estado, por ejemplo Veneno o Quemadura.
 	protected String nombre;
 
-	/** Turnos que le quedan al estado antes de expirar. */
+	// Guarda cuantos turnos le quedan al estado.
 	protected int turnosRestantes;
 
-	/** Cantidad de daño o curacion que aplica por turno. */
-	protected int potenciaPorTurno;
-
-	/**
-	 * Constructor de Estado.
-	 *
-	 * @param nombre           nombre del estado
-	 * @param potenciaPorTurno cantidad de daño o curacion por turno
-	 * @param turnosRestantes  duracion del estado en turnos
-	 */
-	public Estado(String nombre, int potenciaPorTurno, int turnosRestantes) {
+	// Crea un estado con su nombre y los turnos que dura.
+	public Estado(String nombre, int turnosRestantes) {
 		this.nombre = nombre;
-		this.potenciaPorTurno = potenciaPorTurno;
 		this.turnosRestantes = turnosRestantes;
 	}
 
-	/**
-	 * Aplica el efecto del estado sobre el personaje objetivo. Cada subclase define
-	 * si el efecto es daño o curacion. Tambien decrementa turnosRestantes en cada
-	 * llamada.
-	 *
-	 * @param objetivo el personaje sobre el que se aplica el efecto
-	 */
-	public abstract void aplicarEfecto(persona.Personaje objetivo);
+	// Devuelve el nombre del estado.
+	public String getNombre() {
+		return nombre;
+	}
+
+	// Devuelve cuantos turnos quedan.
+	public int getTurnosRestantes() {
+		return turnosRestantes;
+	}
+
+	// Comprueba si el estado todavia tiene turnos.
+	public boolean estaActivo() {
+		return turnosRestantes > 0;
+	}
+
+	// Resta un turno de duracion al estado.
+	public void reducirTurno() {
+		turnosRestantes--;
+	}
+
+	// Cada estado hijo define aqui que efecto aplica al personaje.
+	public abstract void aplicar(persona.Personaje objetivo);
 }

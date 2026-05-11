@@ -10,7 +10,7 @@ import java.util.Scanner;
  * de la partida. Usa un HashMap para el catalogo de personajes disponibles.
  *
  * @author Victor
- * @version 1.0 
+ * @version 1.0
  */
 public class main {
 
@@ -59,17 +59,17 @@ public class main {
 		persona.Personaje[] equipoB;
 
 		if (modo == 1) {
-			equipoA = new persona.Personaje[] { new persona.Jedi("Yoda"), new persona.SoldadoRebelde("Han Solo"),
-					new persona.Sanador("Leia") };
-			equipoB = new persona.Personaje[] { new persona.Sith("Darth Vader"),
-					new persona.SoldadoImperial("Stormtrooper"), new persona.Cazarrecompensas("Boba Fett") };
+			equipoA = new persona.Personaje[] { new Jedi("Yoda"), new SoldadoRebelde("Han Solo"),
+					new Sanador("Leia") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"),
+					new SoldadoImperial("Stormtrooper"), new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo A: Yoda / Han Solo / Leia");
 			System.out.println("Equipo B: Darth Vader / Stormtrooper / Boba Fett");
 		} else {
 			System.out.println("\n=== ELIGE TU EQUIPO ===");
 			equipoA = elegirEquipo("Tu equipo");
-			equipoB = new persona.Personaje[] { new persona.Sith("Darth Vader"),
-					new persona.SoldadoImperial("Stormtrooper"), new persona.Cazarrecompensas("Boba Fett") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"),
+					new SoldadoImperial("Stormtrooper"), new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo enemigo: Darth Vader / Stormtrooper / Boba Fett");
 		}
 
@@ -157,7 +157,8 @@ public class main {
 
 		System.out.println("\nTurno de " + p.nombre);
 
-		if (p instanceof persona.Jedi) {
+		if (p instanceof Jedi) {
+			Jedi jedi = (Jedi) p;
 			System.out.println("1) Ataque basico");
 			System.out.println("2) Empujon Fuerza");
 			System.out.println("3) Aplastamiento");
@@ -166,13 +167,14 @@ public class main {
 			if (op == 1)
 				p.ataqueBasico(elegirObjetivo(enemigos));
 			else if (op == 2)
-				p.usarEmpujon(enemigos);
+				jedi.usarEmpujon(enemigos);
 			else if (op == 3)
-				p.usarAplastamiento(elegirObjetivo(enemigos));
+				jedi.usarAplastamiento(elegirObjetivo(enemigos));
 			else
-				p.usarTelequinesis(elegirObjetivo(enemigos));
+				jedi.usarTelequinesis(elegirObjetivo(enemigos));
 
-		} else if (p instanceof persona.Sith) {
+		} else if (p instanceof Sith) {
+			Sith sith = (Sith) p;
 			System.out.println("1) Ataque basico");
 			System.out.println("2) Empujon Fuerza");
 			System.out.println("3) Aplastamiento");
@@ -183,27 +185,29 @@ public class main {
 				if (obj != null)
 					p.ataqueBasico(obj);
 			} else if (op == 2)
-				p.usarEmpujon(enemigos);
+				sith.usarEmpujon(enemigos);
 			else if (op == 3) {
 				persona.Personaje obj = elegirObjetivo(enemigos);
 				if (obj != null)
-					p.usarAplastamiento(obj);
+					sith.usarAplastamiento(obj);
 			} else {
 				persona.Personaje obj = elegirObjetivo(enemigos);
 				if (obj != null)
-					p.usarEstrangulamiento(obj);
+					sith.usarEstrangulamiento(obj);
 			}
 
-		} else if (p instanceof persona.Cazarrecompensas) {
+		} else if (p instanceof Cazarrecompensas) {
+			Cazarrecompensas cazarrecompensas = (Cazarrecompensas) p;
 			System.out.println("1) Ataque basico");
 			System.out.println("2) Quemadura");
 			int op = leerEntero(1, 2);
 			if (op == 1)
 				p.ataqueBasico(elegirObjetivo(enemigos));
 			else
-				p.usarQuemadura(elegirObjetivo(enemigos));
+				cazarrecompensas.usarQuemadura(elegirObjetivo(enemigos));
 
-		} else if (p instanceof persona.Sanador) {
+		} else if (p instanceof Sanador) {
+			Sanador sanador = (Sanador) p;
 			System.out.println("1) Ataque basico");
 			System.out.println("2) Curacion");
 			System.out.println("3) Renovar");
@@ -211,9 +215,9 @@ public class main {
 			if (op == 1)
 				p.ataqueBasico(elegirObjetivo(enemigos));
 			else if (op == 2)
-				p.usarCuracion(elegirObjetivo(aliados));
+				sanador.usarCuracion(elegirObjetivo(aliados));
 			else
-				p.usarRenovar(elegirObjetivo(aliados));
+				sanador.usarRenovar(elegirObjetivo(aliados));
 
 		} else {
 			System.out.println("1) Ataque basico");
@@ -221,8 +225,13 @@ public class main {
 			int op = leerEntero(1, 2);
 			if (op == 1)
 				p.ataqueBasico(elegirObjetivo(enemigos));
-			else
-				p.usarVeneno(elegirObjetivo(enemigos));
+			else if (p instanceof SoldadoRebelde) {
+				SoldadoRebelde soldado = (SoldadoRebelde) p;
+				soldado.usarVeneno(elegirObjetivo(enemigos));
+			} else if (p instanceof SoldadoImperial) {
+				SoldadoImperial soldado = (SoldadoImperial) p;
+				soldado.usarVeneno(elegirObjetivo(enemigos));
+			}
 		}
 	}
 
@@ -306,16 +315,16 @@ public class main {
 	 */
 	private static persona.Personaje crearPersonaje(int tipo, String nombre) {
 		if (tipo == 1)
-			return new persona.Jedi(nombre);
+			return new Jedi(nombre);
 		if (tipo == 2)
-			return new persona.Sith(nombre);
+			return new Sith(nombre);
 		if (tipo == 3)
-			return new persona.SoldadoRebelde(nombre);
+			return new SoldadoRebelde(nombre);
 		if (tipo == 4)
-			return new persona.SoldadoImperial(nombre);
+			return new SoldadoImperial(nombre);
 		if (tipo == 5)
-			return new persona.Cazarrecompensas(nombre);
-		return new persona.Sanador(nombre);
+			return new Cazarrecompensas(nombre);
+		return new Sanador(nombre);
 	}
 
 	/**
