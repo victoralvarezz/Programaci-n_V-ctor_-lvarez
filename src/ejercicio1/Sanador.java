@@ -57,11 +57,16 @@ public class Sanador extends persona.Personaje {
 			if (p != null && p.estaVivo())
 				if (min == null || p.vida < min.vida)
 					min = p;
-		if (min != null && min.vida < 40 && mana >= 10)
+		if (min != null && min.vida < 40) {
+			if (atacarSiNoHayMana(enemigoRandom(enemigos), 10))
+				return;
 			usarCuracion(min);
-		else if (min != null && mana >= 12)
+		} else if (min != null) {
+			if (atacarSiNoHayMana(enemigoRandom(enemigos), 12))
+				return;
 			usarRenovar(min);
-		else
+		} else {
 			ataqueBasico(enemigoRandom(enemigos));
+		}
 	}
 }

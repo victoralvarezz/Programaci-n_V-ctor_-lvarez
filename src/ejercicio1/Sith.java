@@ -69,11 +69,9 @@ public class Sith extends persona.Personaje {
 		persona.Personaje obj = enemigoRandom(enemigos);
 		if (obj == null)
 			return;
-		if (mana < 10) {
-			ataqueBasico(obj);
+		if (atacarSiNoHayMana(obj, 10))
 			return;
-		}
-		int op = (int) (Math.random() * 3) + 1;
+		int op = opcionAleatoria(3);
 		if (op == 1 && mana >= 10)
 			usarEmpujon(enemigos);
 		else if (op == 2 && mana >= 10)

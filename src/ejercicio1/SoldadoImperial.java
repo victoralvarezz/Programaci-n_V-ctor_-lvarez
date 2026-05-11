@@ -40,9 +40,8 @@ public class SoldadoImperial extends persona.Personaje {
 		persona.Personaje obj = enemigoRandom(enemigos);
 		if (obj == null)
 			return;
-		if (mana >= 10)
-			usarVeneno(obj);
-		else
-			ataqueBasico(obj);
+		if (atacarSiNoHayMana(obj, 10))
+			return;
+		usarVeneno(obj);
 	}
 }

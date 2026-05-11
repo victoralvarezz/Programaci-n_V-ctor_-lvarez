@@ -121,6 +121,31 @@ public class persona {
 		}
 
 		/**
+		 * Devuelve una opcion aleatoria entre 1 y max.
+		 *
+		 * @param max numero maximo de opciones
+		 * @return opcion aleatoria
+		 */
+		protected int opcionAleatoria(int max) {
+			return (int) (Math.random() * max) + 1;
+		}
+
+		/**
+		 * Ataca si no hay mana suficiente.
+		 *
+		 * @param obj        personaje objetivo
+		 * @param manaMinimo mana minimo necesario
+		 * @return true si ha atacado, false si hay mana suficiente
+		 */
+		protected boolean atacarSiNoHayMana(Personaje obj, int manaMinimo) {
+			if (mana < manaMinimo) {
+				ataqueBasico(obj);
+				return true;
+			}
+			return false;
+		}
+
+		/**
 		 * Aplica un nuevo estado respetando la politica de stacking. Si ya existe un
 		 * estado con el mismo nombre, se renueva su duracion. Si no existe y hay hueco,
 		 * se añade al array.

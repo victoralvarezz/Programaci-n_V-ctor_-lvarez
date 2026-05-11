@@ -49,6 +49,13 @@ public class main {
 			return;
 		}
 
+		System.out.println("\nElige dificultad:");
+		System.out.println("1) Facil");
+		System.out.println("2) Normal");
+		System.out.println("3) Dificil");
+
+		int dificultad = leerEntero(1, 3);
+
 		System.out.println("\nElige modo:");
 		System.out.println("1) Combate automatico");
 		System.out.println("2) Elegir mi equipo y jugar manual");
@@ -72,6 +79,8 @@ public class main {
 					new SoldadoImperial("Stormtrooper"), new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo enemigo: Darth Vader / Stormtrooper / Boba Fett");
 		}
+
+		aplicarDificultad(equipoB, dificultad);
 
 		int ronda = 1;
 		System.out.println("\n=== COMBATE INICIADO ===");
@@ -351,6 +360,29 @@ public class main {
 			System.out.print(" | Estados: ninguno");
 		}
 		System.out.println();
+	}
+
+	/**
+	 * Cambia las estadisticas del equipo enemigo segun la dificultad elegida.
+	 *
+	 * @param enemigos   equipo enemigo que se va a modificar
+	 * @param dificultad dificultad elegida por el jugador
+	 */
+	private static void aplicarDificultad(persona.Personaje[] enemigos, int dificultad) {
+		for (persona.Personaje enemigo : enemigos) {
+			if (enemigo != null) {
+				// Solo se cambian los enemigos para hacer el combate mas facil o dificil.
+				if (dificultad == 1) {
+					enemigo.vidaMax = Math.max(1, enemigo.vidaMax - 20);
+					enemigo.vida = Math.max(1, enemigo.vida - 20);
+					enemigo.ataque = Math.max(1, enemigo.ataque - 3);
+				} else if (dificultad == 3) {
+					enemigo.vidaMax = enemigo.vidaMax + 30;
+					enemigo.vida = enemigo.vida + 30;
+					enemigo.ataque = enemigo.ataque + 5;
+				}
+			}
+		}
 	}
 
 	/**

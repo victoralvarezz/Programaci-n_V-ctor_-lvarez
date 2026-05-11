@@ -40,9 +40,8 @@ public class Cazarrecompensas extends persona.Personaje {
 		persona.Personaje obj = enemigoRandom(enemigos);
 		if (obj == null)
 			return;
-		if (mana >= 12)
-			usarQuemadura(obj);
-		else
-			ataqueBasico(obj);
+		if (atacarSiNoHayMana(obj, 12))
+			return;
+		usarQuemadura(obj);
 	}
 }
