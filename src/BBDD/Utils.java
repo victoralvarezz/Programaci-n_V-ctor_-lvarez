@@ -18,7 +18,7 @@ public class Utils {
 	public static Connection getConnection() {
 		Connection con = null;
 
-		try {
+		try {	
 			// Abrimos la conexion
 			con = DriverManager.getConnection(URL, USUARIO, PASSWORD);
 		} catch (SQLException e) {
@@ -40,7 +40,7 @@ public class Utils {
 
 			// Preparamos la consulta
 			ps = con.prepareStatement(sql);
-
+			// Metemos los parametros
 			for (int i = 0; i < parametros.size(); i++) {
 				ps.setObject(i + 1, parametros.get(i));
 			}
@@ -81,8 +81,115 @@ public class Utils {
 		return datos;
 	}
 
+	public static void insertData(String sql, List<Object> parametros) {
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			con = getConnection();
+
+			// Preparamos la consulta
+			ps = con.prepareStatement(sql);
+
+			// Metemos los parametros
+			for (int i = 0; i < parametros.size(); i++) {
+				ps.setObject(i + 1, parametros.get(i));
+			}
+
+			// Ejecutamos el insert
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("Error al hacer el insert");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (ps != null) {
+					// Cerramos la consulta
+					ps.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("Error al cerrar la consulta");
+				e.printStackTrace();
+			}
+
+			cerrarConexion(con);
+		}
+	}
+
+	public static void updateData(String sql, List<Object> parametros) {
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			con = getConnection();
+
+			// Preparamos la consulta
+			ps = con.prepareStatement(sql);
+
+			// Metemos los parametros
+			for (int i = 0; i < parametros.size(); i++) {
+				ps.setObject(i + 1, parametros.get(i));
+			}
+
+			// Ejecutamos el update
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("Error al hacer el update");
+			e.printStackTrace();
+		} finally {
+			try {
+				
+				if (ps != null) {
+					// Cerramos la consulta
+					ps.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("Error al cerrar la consulta");
+				e.printStackTrace();
+			}
+
+			cerrarConexion(con);
+		}
+	}
+
+	public static void deleteData(String sql, List<Object> parametros) {
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			con = getConnection();
+
+			// Preparamos la consulta
+			ps = con.prepareStatement(sql);
+
+			// Metemos los parametros
+			for (int i = 0; i < parametros.size(); i++) {
+				ps.setObject(i + 1, parametros.get(i));
+			}
+
+			// Ejecutamos el delete
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("Error al hacer el delete");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (ps != null) {
+					// Cerramos la consulta
+					ps.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("Error al cerrar la consulta");
+				e.printStackTrace();
+			}
+
+			cerrarConexion(con);
+		}
+	}
+
 	public static void cerrarConexion(Connection con) {
 		try {
+			// Cerramos la conexion
 			if (con != null) {
 				con.close();
 			}
