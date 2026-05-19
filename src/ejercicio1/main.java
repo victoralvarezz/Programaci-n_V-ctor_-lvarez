@@ -1,5 +1,7 @@
 package ejercicio1;
 
+import BBDD.GestorPartidas;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -62,6 +64,10 @@ public class main {
 
 		int modo = leerEntero(1, 2);
 
+		System.out.println("\nIntroduce id para guardar esta partida:");
+		// Pedimos el id de la partida
+		int idPartida = leerEntero(1, 9999);
+
 		persona.Personaje[] equipoA;
 		persona.Personaje[] equipoB;
 
@@ -83,6 +89,16 @@ public class main {
 		aplicarDificultad(equipoB, dificultad);
 
 		int ronda = 1;
+
+		// Creamos la partida en la base de datos
+		GestorPartidas.borrarPartida(idPartida);
+		GestorPartidas.crearPartida(idPartida, dificultad);
+
+		// Guardamos los equipos al empezar
+		guardarEquipoPartida(equipoA, idPartida, 0, "Jugador");
+		guardarEquipoPartida(equipoB, idPartida, 0, "Enemigo");
+		GestorPartidas.actualizarPartida(idPartida, 0, 0, true);
+
 		System.out.println("\n=== COMBATE INICIADO ===");
 
 		while (hayVivos(equipoA) && hayVivos(equipoB)) {
@@ -111,8 +127,13 @@ public class main {
 				}
 			}
 
-			if (!hayVivos(equipoB))
+			if (!hayVivos(equipoB)) {
+				// Guardamos la ronda actual
+				guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+				guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+				GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
 				break;
+			}
 
 			System.out.println("\n-- Turno Equipo B --");
 			for (persona.Personaje p : equipoB) {
@@ -126,6 +147,11 @@ public class main {
 			procesarEquipo(equipoA);
 			procesarEquipo(equipoB);
 			sleep(1700);
+
+			// Guardamos la ronda actual
+			guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+			guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+			GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
 
 			ronda++;
 		}
@@ -152,6 +178,45 @@ public class main {
 						+ (p.estaVivo() ? "VIVO" : "ELIMINADO"));
 
 		sc.close();
+	}
+
+	/**
+	 * Guarda los personajes de un equipo en la partida.
+	 *
+	 * @param equipo    equipo que se va a guardar
+	 * @param idPartida id de la partida
+	 * @param turno     ronda que se esta guardando
+	 * @param nombreEquipo nombre del equipo
+	 */
+	private static void guardarEquipoPartida(persona.Personaje[] equipo, int idPartida, int turno, String nombreEquipo) {
+		for (persona.Personaje p : equipo) {
+			if (p != null) {
+				GestorPartidas.guardarPersonajePartida(idPartida, obtenerIdPersonaje(p), turno, p.vida, p.mana,
+						p.estaVivo(), nombreEquipo);
+			}
+		}
+	}
+
+	/**
+	 * Devuelve el id del personaje segun su nombre.
+	 *
+	 * @param p personaje del juego
+	 * @return id del personaje en la base de datos
+	 */
+	private static int obtenerIdPersonaje(persona.Personaje p) {
+		if (p.nombre.startsWith("Yoda"))
+			return 1;
+		if (p.nombre.startsWith("Darth Vader"))
+			return 2;
+		if (p.nombre.startsWith("Leia"))
+			return 3;
+		if (p.nombre.startsWith("Han Solo"))
+			return 4;
+		if (p.nombre.startsWith("Stormtrooper"))
+			return 5;
+		if (p.nombre.startsWith("Boba Fett"))
+			return 6;
+		return 0;
 	}
 
 	/**
