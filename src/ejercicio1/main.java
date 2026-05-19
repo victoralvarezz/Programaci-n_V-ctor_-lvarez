@@ -3,6 +3,7 @@ package ejercicio1;
 import BBDD.GestorPartidas;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -40,12 +41,33 @@ public class main {
 	public static void main(String[] args) {
 
 		System.out.println("=== RPG POR TURNOS ===");
-		System.out.println("1) Iniciar combate");
-		System.out.println("2) Salir");
+		System.out.println("1) Nueva partida");
+		System.out.println("2) Cargar partida guardada");
+		System.out.println("3) Listar partidas guardadas");
+		System.out.println("4) Borrar partida guardada");
+		System.out.println("5) Salir");
 
-		int opcionInicio = leerEntero(1, 2);
+		int opcionInicio = leerEntero(1, 5);
 
 		if (opcionInicio == 2) {
+			cargarPartidaGuardada();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 3) {
+			listarPartidasGuardadas();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 4) {
+			borrarPartidaGuardada();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 5) {
 			System.out.println("Hasta luego.");
 			sc.close();
 			return;
@@ -178,6 +200,93 @@ public class main {
 						+ (p.estaVivo() ? "VIVO" : "ELIMINADO"));
 
 		sc.close();
+	}
+
+	/**
+	 * Lista las partidas guardadas.
+	 *
+	 * @return lista de partidas guardadas
+	 */
+	private static List<List<Object>> listarPartidasGuardadas() {
+		// Listamos las partidas guardadas
+		List<List<Object>> partidas = GestorPartidas.listarPartidas();
+
+		for (int i = 0; i < partidas.size(); i++) {
+			List<Object> partida = partidas.get(i);
+			System.out.println("Partida: " + partida.get(0));
+			System.out.println("Rondas guardadas: " + partida.get(1));
+			System.out.println("Ronda actual: " + partida.get(2));
+			System.out.println("Final del turno: " + partida.get(3));
+			System.out.println("Dificultad: " + partida.get(4));
+			System.out.println("--------------------");
+		}
+
+		return partidas;
+	}
+
+	/**
+	 * Carga una partida guardada y muestra sus personajes.
+	 */
+	private static void cargarPartidaGuardada() {
+		// Cargamos una partida guardada
+		List<List<Object>> partidas = listarPartidasGuardadas();
+
+		if (partidas.size() == 0) {
+			System.out.println("No hay partidas guardadas.");
+			return;
+		}
+
+		System.out.println("Introduce id de partida a cargar:");
+		int idPartida = leerEntero(1, 9999);
+		int turno = -1;
+
+		for (int i = 0; i < partidas.size(); i++) {
+			List<Object> partida = partidas.get(i);
+			int idGuardado = Integer.parseInt(String.valueOf(partida.get(0)));
+
+			if (idGuardado == idPartida) {
+				turno = Integer.parseInt(String.valueOf(partida.get(2)));
+			}
+		}
+
+		if (turno == -1) {
+			System.out.println("No existe esa partida.");
+			return;
+		}
+
+		List<List<Object>> personajes = GestorPartidas.cargarTurno(idPartida, turno);
+
+		// Mostramos los personajes cargados
+		for (int i = 0; i < personajes.size(); i++) {
+			List<Object> personaje = personajes.get(i);
+			System.out.println("Nombre: " + personaje.get(0));
+			System.out.println("Tipo: " + personaje.get(1));
+			System.out.println("Turno: " + personaje.get(2));
+			System.out.println("Vida actual: " + personaje.get(3));
+			System.out.println("Mana actual: " + personaje.get(4));
+			System.out.println("Esta vivo: " + personaje.get(5));
+			System.out.println("Equipo: " + personaje.get(6));
+			System.out.println("--------------------");
+		}
+	}
+
+	/**
+	 * Borra una partida guardada.
+	 */
+	private static void borrarPartidaGuardada() {
+		// Borramos una partida guardada
+		List<List<Object>> partidas = listarPartidasGuardadas();
+
+		if (partidas.size() == 0) {
+			System.out.println("No hay partidas guardadas.");
+			return;
+		}
+
+		System.out.println("Introduce id de partida a borrar:");
+		int idPartida = leerEntero(1, 9999);
+
+		GestorPartidas.borrarPartida(idPartida);
+		System.out.println("Partida borrada.");
 	}
 
 	/**
