@@ -542,7 +542,7 @@ public class main {
 	 * @param enemigos   equipo enemigo que se va a modificar
 	 * @param dificultad dificultad elegida por el jugador
 	 */
-	private static void aplicarDificultad(persona.Personaje[] enemigos, int dificultad) {
+	public static void aplicarDificultad(persona.Personaje[] enemigos, int dificultad) {
 		for (persona.Personaje enemigo : enemigos) {
 			if (enemigo != null) {
 				// Solo se cambian los enemigos para hacer el combate mas facil o dificil.
