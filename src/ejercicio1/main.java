@@ -3,6 +3,7 @@ package ejercicio1;
 import BBDD.GestorLogros;
 import BBDD.GestorPartidas;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +48,10 @@ public class main {
 		System.out.println("3) Listar partidas guardadas");
 		System.out.println("4) Borrar partida guardada");
 		System.out.println("5) Ver logros de una partida");
-		System.out.println("6) Salir");
+		System.out.println("6) Ver ranking");
+		System.out.println("7) Salir");
 
-		int opcionInicio = leerEntero(1, 6);
+		int opcionInicio = leerEntero(1, 7);
 
 		if (opcionInicio == 2) {
 			cargarPartidaGuardada();
@@ -76,6 +78,12 @@ public class main {
 		}
 
 		if (opcionInicio == 6) {
+			verRanking();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 7) {
 			System.out.println("Hasta luego.");
 			sc.close();
 			return;
@@ -94,9 +102,19 @@ public class main {
 
 		int modo = leerEntero(1, 2);
 
-		System.out.println("\nIntroduce id para guardar esta partida:");
-		// Pedimos el id de la partida
-		int idPartida = leerEntero(1, 9999);
+		// Preguntamos si quiere guardar la partida
+		System.out.println("\n¿Quieres guardar esta partida?");
+		System.out.println("1) Si");
+		System.out.println("2) No");
+		int opcionGuardar = leerEntero(1, 2);
+		boolean guardarPartida = opcionGuardar == 1;
+		int idPartida = -1;
+
+		if (guardarPartida) {
+			System.out.println("\nIntroduce id para guardar esta partida:");
+			// Pedimos el id de la partida
+			idPartida = leerEntero(1, 9999);
+		}
 
 		persona.Personaje[] equipoA;
 		persona.Personaje[] equipoB;
@@ -119,15 +137,18 @@ public class main {
 
 		int ronda = 1;
 
-		// Creamos la partida en la base de datos
-		GestorPartidas.borrarPartida(idPartida);
-		GestorPartidas.crearPartida(idPartida, dificultad);
+		// Solo guardamos si el usuario quiere
+		if (guardarPartida) {
+			// Creamos la partida en la base de datos
+			GestorPartidas.borrarPartida(idPartida);
+			GestorPartidas.crearPartida(idPartida, dificultad);
 
-		// Guardamos los equipos al empezar
-		guardarEquipoPartida(equipoA, idPartida, 0, "Jugador");
-		guardarEquipoPartida(equipoB, idPartida, 0, "Enemigo");
-		GestorPartidas.actualizarPartida(idPartida, 0, 0, true);
-		GestorLogros.desbloquearLogro(idPartida, 1);
+			// Guardamos los equipos al empezar
+			guardarEquipoPartida(equipoA, idPartida, 0, "Jugador");
+			guardarEquipoPartida(equipoB, idPartida, 0, "Enemigo");
+			GestorPartidas.actualizarPartida(idPartida, 0, 0, true);
+			GestorLogros.desbloquearLogro(idPartida, 1);
+		}
 
 		System.out.println("\n=== COMBATE INICIADO ===");
 
@@ -158,12 +179,15 @@ public class main {
 			}
 
 			if (!hayVivos(equipoB)) {
-				// Guardamos la ronda actual
-				guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
-				guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
-				GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
-				if (hayMuertos(equipoB))
-					GestorLogros.desbloquearLogro(idPartida, 4);
+				// Solo guardamos si el usuario quiere
+				if (guardarPartida) {
+					// Guardamos la ronda actual
+					guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+					guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+					GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+					if (hayMuertos(equipoB))
+						GestorLogros.desbloquearLogro(idPartida, 4);
+				}
 				break;
 			}
 
@@ -180,12 +204,15 @@ public class main {
 			procesarEquipo(equipoB);
 			sleep(1700);
 
-			// Guardamos la ronda actual
-			guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
-			guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
-			GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
-			if (hayMuertos(equipoB))
-				GestorLogros.desbloquearLogro(idPartida, 4);
+			// Solo guardamos si el usuario quiere
+			if (guardarPartida) {
+				// Guardamos la ronda actual
+				guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+				guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+				GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+				if (hayMuertos(equipoB))
+					GestorLogros.desbloquearLogro(idPartida, 4);
+			}
 
 			ronda++;
 		}
@@ -194,17 +221,25 @@ public class main {
 
 		if (!hayVivos(equipoB) && hayVivos(equipoA)) {
 			System.out.println("Gana el Equipo A");
-			GestorLogros.desbloquearLogro(idPartida, 2);
-			GestorLogros.desbloquearLogro(idPartida, 3);
-			if (dificultad == 1)
-				GestorLogros.desbloquearLogro(idPartida, 5);
-			else if (dificultad == 2)
-				GestorLogros.desbloquearLogro(idPartida, 6);
-			else if (dificultad == 3)
-				GestorLogros.desbloquearLogro(idPartida, 7);
-		} else if (!hayVivos(equipoA) && hayVivos(equipoB))
+			if (guardarPartida) {
+				GestorLogros.desbloquearLogro(idPartida, 2);
+				GestorLogros.desbloquearLogro(idPartida, 3);
+				if (dificultad == 1)
+					GestorLogros.desbloquearLogro(idPartida, 5);
+				else if (dificultad == 2)
+					GestorLogros.desbloquearLogro(idPartida, 6);
+				else if (dificultad == 3)
+					GestorLogros.desbloquearLogro(idPartida, 7);
+				actualizarRankingEquipoGanador(equipoA, dificultad);
+				actualizarRankingEquipoPerdedor(equipoB);
+			}
+		} else if (!hayVivos(equipoA) && hayVivos(equipoB)) {
 			System.out.println("Gana el Equipo B");
-		else
+			if (guardarPartida) {
+				actualizarRankingEquipoGanador(equipoB, dificultad);
+				actualizarRankingEquipoPerdedor(equipoA);
+			}
+		} else
 			System.out.println("Empate");
 
 		System.out.println("\n--- Equipo A ---");
@@ -347,6 +382,26 @@ public class main {
 	}
 
 	/**
+	 * Muestra el ranking de personajes.
+	 */
+	private static void verRanking() {
+		System.out.println("=== RANKING DE PERSONAJES ===");
+		List<List<Object>> ranking = GestorPartidas.listarRanking();
+
+		// Mostramos el ranking de personajes
+		for (int i = 0; i < ranking.size(); i++) {
+			List<Object> personaje = ranking.get(i);
+			System.out.println("Nombre: " + personaje.get(0));
+			System.out.println("Tipo: " + personaje.get(1));
+			System.out.println("Nivel: " + personaje.get(2));
+			System.out.println("Experiencia: " + personaje.get(3));
+			System.out.println("Victorias: " + personaje.get(4));
+			System.out.println("Derrotas: " + personaje.get(5));
+			System.out.println("--------------------");
+		}
+	}
+
+	/**
 	 * Guarda los personajes de un equipo en la partida.
 	 *
 	 * @param equipo       equipo que se va a guardar
@@ -384,6 +439,68 @@ public class main {
 		if (p.nombre.startsWith("Boba Fett"))
 			return 6;
 		return 0;
+	}
+
+	/**
+	 * Actualiza victorias y experiencia del equipo ganador.
+	 *
+	 * @param equipo     equipo ganador
+	 * @param dificultad dificultad de la partida
+	 */
+	private static void actualizarRankingEquipoGanador(persona.Personaje[] equipo, int dificultad) {
+		List<Integer> idsActualizados = new ArrayList<Integer>();
+		int experienciaGanada = obtenerExperienciaDificultad(dificultad);
+
+		// Actualizamos el ranking del equipo ganador
+		for (int i = 0; i < equipo.length; i++) {
+			if (equipo[i] != null) {
+				int idPersonaje = obtenerIdPersonaje(equipo[i]);
+
+				// Evitamos sumar dos veces el mismo personaje
+				if (idPersonaje != 0 && !idsActualizados.contains(idPersonaje)) {
+					// Sumamos victoria y experiencia
+					GestorPartidas.sumarVictoriaPersonaje(idPersonaje, experienciaGanada);
+					idsActualizados.add(idPersonaje);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Actualiza derrotas del equipo perdedor.
+	 *
+	 * @param equipo equipo perdedor
+	 */
+	private static void actualizarRankingEquipoPerdedor(persona.Personaje[] equipo) {
+		List<Integer> idsActualizados = new ArrayList<Integer>();
+
+		// Actualizamos derrotas del equipo perdedor
+		for (int i = 0; i < equipo.length; i++) {
+			if (equipo[i] != null) {
+				int idPersonaje = obtenerIdPersonaje(equipo[i]);
+
+				// Evitamos sumar dos veces el mismo personaje
+				if (idPersonaje != 0 && !idsActualizados.contains(idPersonaje)) {
+					// Sumamos derrota
+					GestorPartidas.sumarDerrotaPersonaje(idPersonaje);
+					idsActualizados.add(idPersonaje);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Devuelve la experiencia ganada segun la dificultad.
+	 *
+	 * @param dificultad dificultad elegida
+	 * @return experiencia ganada
+	 */
+	private static int obtenerExperienciaDificultad(int dificultad) {
+		if (dificultad == 1)
+			return 30;
+		if (dificultad == 2)
+			return 50;
+		return 80;
 	}
 
 	/**

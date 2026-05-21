@@ -37,8 +37,7 @@ public class GestorPartidas {
 	}
 
 	public static void actualizarPartida(int idPartida, int rondasGuardadas, int rondaActual, boolean finalDelTurno) {
-		String sql = "UPDATE Partida "
-				+ "SET rondas_guardadas = ?, id_ronda_actual = ?, final_del_turno = ? "
+		String sql = "UPDATE Partida " + "SET rondas_guardadas = ?, id_ronda_actual = ?, final_del_turno = ? "
 				+ "WHERE id_partida = ?";
 		List<Object> parametros = new ArrayList<Object>();
 
@@ -52,21 +51,45 @@ public class GestorPartidas {
 
 	public static List<List<Object>> listarPartidas() {
 		String sql = "SELECT p.id_partida, p.rondas_guardadas, p.id_ronda_actual, p.final_del_turno, d.nombre "
-				+ "FROM Partida p "
-				+ "JOIN Dificultad d ON p.id_dificultad = d.id_dificultad";
+				+ "FROM Partida p " + "JOIN Dificultad d ON p.id_dificultad = d.id_dificultad";
 		List<Object> parametros = new ArrayList<Object>();
 
 		// Listamos las partidas
 		return Utils.selectData(sql, parametros);
 	}
 
+	public static List<List<Object>> listarRanking() {
+		String sql = "SELECT nombre, tipo, nivel, experiencia, victorias, derrotas " + "FROM Personaje "
+				+ "ORDER BY victorias DESC, experiencia DESC, nivel DESC";
+		List<Object> parametros = new ArrayList<Object>();
+
+		return Utils.selectData(sql, parametros);
+	}
+
+	public static void sumarVictoriaPersonaje(int idPersonaje, int experienciaGanada) {
+		String sql = "UPDATE Personaje "
+				+ "SET victorias = victorias + 1, nivel = 1 + FLOOR((experiencia + ?) / 100), experiencia = experiencia + ? "
+				+ "WHERE id_personaje = ?";
+		List<Object> parametros = new ArrayList<Object>();
+
+		parametros.add(experienciaGanada);
+		parametros.add(experienciaGanada);
+		parametros.add(idPersonaje);
+		Utils.updateData(sql, parametros);
+	}
+
+	public static void sumarDerrotaPersonaje(int idPersonaje) {
+		String sql = "UPDATE Personaje " + "SET derrotas = derrotas + 1 " + "WHERE id_personaje = ?";
+		List<Object> parametros = new ArrayList<Object>();
+
+		parametros.add(idPersonaje);
+		Utils.updateData(sql, parametros);
+	}
+
 	public static List<List<Object>> cargarTurno(int idPartida, int turno) {
 		String sql = "SELECT p.nombre, p.tipo, pp.turno, pp.vida_actual, pp.mana_actual, pp.estaVivo, pp.equipo "
-				+ "FROM Partida_Personaje pp "
-				+ "JOIN Personaje p ON pp.id_personaje = p.id_personaje "
-				+ "WHERE pp.id_partida = ? "
-				+ "AND pp.turno = ? "
-				+ "ORDER BY pp.equipo, p.nombre";
+				+ "FROM Partida_Personaje pp " + "JOIN Personaje p ON pp.id_personaje = p.id_personaje "
+				+ "WHERE pp.id_partida = ? " + "AND pp.turno = ? " + "ORDER BY pp.equipo, p.nombre";
 		List<Object> parametros = new ArrayList<Object>();
 
 		// Cargamos un turno
