@@ -4,6 +4,8 @@ USE starwars_rpg;
 -- Borramos las tablas si ya existen para poder ejecutar el script varias veces sin errores
 DROP TABLE IF EXISTS Partida_Personaje_Estado;
 DROP TABLE IF EXISTS Partida_Personaje;
+DROP TABLE IF EXISTS Partida_Logro;
+DROP TABLE IF EXISTS Logro;
 DROP TABLE IF EXISTS Partida;
 DROP TABLE IF EXISTS Combate;
 DROP TABLE IF EXISTS Personaje_Estado;
@@ -152,9 +154,6 @@ CREATE TABLE Partida (
   FOREIGN KEY (id_dificultad) REFERENCES Dificultad(id_dificultad)
 );
 
-INSERT INTO Partida VALUES
-  (1, 0, 1, FALSE, 2);
-
 CREATE TABLE Partida_Personaje (
   id_partida INT NOT NULL,
   id_personaje INT NOT NULL,
@@ -185,3 +184,9 @@ SELECT * FROM Hechizos;
 SELECT * FROM Estado;
 SELECT * FROM Personaje;
 SELECT * FROM Dificultad;
+
+
+
+SELECT *
+FROM Partida
+WHERE id_partida = 200;

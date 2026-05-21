@@ -1,5 +1,6 @@
 package ejercicio1;
 
+import BBDD.GestorLogros;
 import BBDD.GestorPartidas;
 
 import java.util.HashMap;
@@ -45,9 +46,10 @@ public class main {
 		System.out.println("2) Cargar partida guardada");
 		System.out.println("3) Listar partidas guardadas");
 		System.out.println("4) Borrar partida guardada");
-		System.out.println("5) Salir");
+		System.out.println("5) Ver logros de una partida");
+		System.out.println("6) Salir");
 
-		int opcionInicio = leerEntero(1, 5);
+		int opcionInicio = leerEntero(1, 6);
 
 		if (opcionInicio == 2) {
 			cargarPartidaGuardada();
@@ -68,6 +70,12 @@ public class main {
 		}
 
 		if (opcionInicio == 5) {
+			verLogrosPartida();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 6) {
 			System.out.println("Hasta luego.");
 			sc.close();
 			return;
@@ -94,17 +102,16 @@ public class main {
 		persona.Personaje[] equipoB;
 
 		if (modo == 1) {
-			equipoA = new persona.Personaje[] { new Jedi("Yoda"), new SoldadoRebelde("Han Solo"),
-					new Sanador("Leia") };
-			equipoB = new persona.Personaje[] { new Sith("Darth Vader"),
-					new SoldadoImperial("Stormtrooper"), new Cazarrecompensas("Boba Fett") };
+			equipoA = new persona.Personaje[] { new Jedi("Yoda"), new SoldadoRebelde("Han Solo"), new Sanador("Leia") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"), new SoldadoImperial("Stormtrooper"),
+					new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo A: Yoda / Han Solo / Leia");
 			System.out.println("Equipo B: Darth Vader / Stormtrooper / Boba Fett");
 		} else {
 			System.out.println("\n=== ELIGE TU EQUIPO ===");
 			equipoA = elegirEquipo("Tu equipo");
-			equipoB = new persona.Personaje[] { new Sith("Darth Vader"),
-					new SoldadoImperial("Stormtrooper"), new Cazarrecompensas("Boba Fett") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"), new SoldadoImperial("Stormtrooper"),
+					new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo enemigo: Darth Vader / Stormtrooper / Boba Fett");
 		}
 
@@ -120,6 +127,7 @@ public class main {
 		guardarEquipoPartida(equipoA, idPartida, 0, "Jugador");
 		guardarEquipoPartida(equipoB, idPartida, 0, "Enemigo");
 		GestorPartidas.actualizarPartida(idPartida, 0, 0, true);
+		GestorLogros.desbloquearLogro(idPartida, 1);
 
 		System.out.println("\n=== COMBATE INICIADO ===");
 
@@ -154,6 +162,8 @@ public class main {
 				guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
 				guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
 				GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+				if (hayMuertos(equipoB))
+					GestorLogros.desbloquearLogro(idPartida, 4);
 				break;
 			}
 
@@ -174,15 +184,25 @@ public class main {
 			guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
 			guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
 			GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+			if (hayMuertos(equipoB))
+				GestorLogros.desbloquearLogro(idPartida, 4);
 
 			ronda++;
 		}
 
 		System.out.println("\n=== FIN DEL COMBATE ===");
 
-		if (!hayVivos(equipoB) && hayVivos(equipoA))
+		if (!hayVivos(equipoB) && hayVivos(equipoA)) {
 			System.out.println("Gana el Equipo A");
-		else if (!hayVivos(equipoA) && hayVivos(equipoB))
+			GestorLogros.desbloquearLogro(idPartida, 2);
+			GestorLogros.desbloquearLogro(idPartida, 3);
+			if (dificultad == 1)
+				GestorLogros.desbloquearLogro(idPartida, 5);
+			else if (dificultad == 2)
+				GestorLogros.desbloquearLogro(idPartida, 6);
+			else if (dificultad == 3)
+				GestorLogros.desbloquearLogro(idPartida, 7);
+		} else if (!hayVivos(equipoA) && hayVivos(equipoB))
 			System.out.println("Gana el Equipo B");
 		else
 			System.out.println("Empate");
@@ -290,14 +310,52 @@ public class main {
 	}
 
 	/**
+	 * Muestra los logros de una partida.
+	 */
+	private static void verLogrosPartida() {
+		System.out.println("=== LOGROS DISPONIBLES ===");
+		List<List<Object>> todosLogros = GestorLogros.listarTodosLogros();
+
+		// Mostramos todos los logros disponibles
+		for (int i = 0; i < todosLogros.size(); i++) {
+			List<Object> logro = todosLogros.get(i);
+			System.out.println("Logro: " + logro.get(1));
+			System.out.println("Descripcion: " + logro.get(2));
+			System.out.println("--------------------");
+		}
+
+		listarPartidasGuardadas();
+
+		System.out.println("Introduce id de partida para ver sus logros desbloqueados:");
+		int idPartida = leerEntero(1, 9999);
+
+		List<List<Object>> logros = GestorLogros.listarLogrosPartida(idPartida);
+
+		if (logros.size() == 0) {
+			System.out.println("No hay logros desbloqueados para esta partida.");
+			return;
+		}
+
+		// Mostramos los logros desbloqueados de la partida
+		for (int i = 0; i < logros.size(); i++) {
+			List<Object> logro = logros.get(i);
+			System.out.println("Logro: " + logro.get(0));
+			System.out.println("Descripcion: " + logro.get(1));
+			System.out.println("Fecha: " + logro.get(2));
+			System.out.println("--------------------");
+		}
+	}
+
+	/**
 	 * Guarda los personajes de un equipo en la partida.
 	 *
-	 * @param equipo    equipo que se va a guardar
-	 * @param idPartida id de la partida
-	 * @param turno     ronda que se esta guardando
+	 * @param equipo       equipo que se va a guardar
+	 * @param idPartida    id de la partida
+	 * @param turno        ronda que se esta guardando
 	 * @param nombreEquipo nombre del equipo
 	 */
-	private static void guardarEquipoPartida(persona.Personaje[] equipo, int idPartida, int turno, String nombreEquipo) {
+	private static void guardarEquipoPartida(persona.Personaje[] equipo, int idPartida, int turno,
+			String nombreEquipo) {
 		for (persona.Personaje p : equipo) {
 			if (p != null) {
 				GestorPartidas.guardarPersonajePartida(idPartida, obtenerIdPersonaje(p), turno, p.vida, p.mana,
@@ -569,6 +627,19 @@ public class main {
 	public static boolean hayVivos(persona.Personaje[] equipo) {
 		for (persona.Personaje p : equipo)
 			if (p != null && p.estaVivo())
+				return true;
+		return false;
+	}
+
+	/**
+	 * Comprueba si algun personaje del equipo esta muerto.
+	 *
+	 * @param equipo array del equipo a comprobar
+	 * @return true si hay algun personaje muerto
+	 */
+	public static boolean hayMuertos(persona.Personaje[] equipo) {
+		for (persona.Personaje p : equipo)
+			if (p != null && !p.estaVivo())
 				return true;
 		return false;
 	}
