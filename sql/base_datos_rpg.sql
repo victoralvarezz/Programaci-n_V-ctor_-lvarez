@@ -3,9 +3,8 @@ USE starwars_rpg;
 
 -- Borramos las tablas si ya existen para poder ejecutar el script varias veces sin errores
 DROP TABLE IF EXISTS Partida_Personaje_Estado;
-DROP TABLE IF EXISTS Partida_Personaje;
 DROP TABLE IF EXISTS Partida_Logro;
-DROP TABLE IF EXISTS Logro;
+DROP TABLE IF EXISTS Partida_Personaje;
 DROP TABLE IF EXISTS Partida;
 DROP TABLE IF EXISTS Combate;
 DROP TABLE IF EXISTS Personaje_Estado;
@@ -16,7 +15,9 @@ DROP TABLE IF EXISTS Dificultad;
 DROP TABLE IF EXISTS Estado;
 DROP TABLE IF EXISTS Hechizos;
 DROP TABLE IF EXISTS Armas;
+DROP TABLE IF EXISTS Logro;
 
+-- Tabla de armas
 CREATE TABLE Armas (
   id_arma INT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL,
@@ -28,6 +29,7 @@ INSERT INTO Armas VALUES
   (1, 'Sable de Luz', 10, 'SableLuz'),
   (2, 'Blaster', 8, 'Blaster');
 
+-- Tabla de hechizos directos
 CREATE TABLE Hechizos (
   id_hechizo INT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL,
@@ -43,6 +45,7 @@ INSERT INTO Hechizos VALUES
   (4, 'Aplastamiento', 10, 'Aplastamiento', 18),
   (5, 'Curacion', 10, 'Curacion', 0);
 
+-- Tabla de estados por turnos
 CREATE TABLE Estado (
   id_estado INT PRIMARY KEY,
   nombre VARCHAR(30) NOT NULL,
@@ -56,6 +59,7 @@ INSERT INTO Estado VALUES
   (2, 'Quemadura', 3, 5, 'Quemadura'),
   (3, 'Renovar', 2, 10, 'Renovar');
 
+-- Tabla de personajes
 CREATE TABLE Personaje (
   id_personaje INT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL,
@@ -83,6 +87,7 @@ INSERT INTO Personaje VALUES
   (5, 'Stormtrooper', TRUE, 110, 110, 21, 5, 20, 20, 1, 0, 0, 0, 'SoldadoImperial', 2),
   (6, 'Boba Fett', TRUE, 105, 105, 21, 4, 30, 30, 1, 0, 0, 0, 'Cazarrecompensas', 2);
 
+-- Tablas de relaciones
 CREATE TABLE Lanza (
   id_personaje INT NOT NULL,
   id_hechizo INT NOT NULL,
@@ -132,6 +137,7 @@ INSERT INTO Combate VALUES
   (1, 1, 2),
   (2, 4, 5);
 
+-- Tabla de dificultades
 CREATE TABLE Dificultad (
   id_dificultad INT PRIMARY KEY,
   nombre VARCHAR(20) NOT NULL,
@@ -145,6 +151,23 @@ INSERT INTO Dificultad VALUES
   (2, 'Normal', 0, 0, 50),
   (3, 'Dificil', 30, 5, 80);
 
+-- Tablas de logros
+CREATE TABLE Logro (
+  id_logro INT PRIMARY KEY,
+  nombre VARCHAR(80) NOT NULL,
+  descripcion VARCHAR(255) NOT NULL
+);
+
+INSERT INTO Logro VALUES
+  (1, 'Primera partida', 'Has empezado una partida.'),
+  (2, 'Primera victoria', 'Has ganado una partida.'),
+  (3, 'Victoria del jugador', 'El equipo del jugador ha ganado.'),
+  (4, 'Primer enemigo derrotado', 'Has derrotado al menos un enemigo.'),
+  (5, 'Victoria facil', 'Has ganado en dificultad facil.'),
+  (6, 'Victoria normal', 'Has ganado en dificultad normal.'),
+  (7, 'Victoria dificil', 'Has ganado en dificultad dificil.');
+
+-- Tablas para guardar partidas
 CREATE TABLE Partida (
   id_partida INT PRIMARY KEY,
   rondas_guardadas INT DEFAULT 0,
@@ -152,6 +175,15 @@ CREATE TABLE Partida (
   final_del_turno BOOLEAN DEFAULT FALSE,
   id_dificultad INT,
   FOREIGN KEY (id_dificultad) REFERENCES Dificultad(id_dificultad)
+);
+
+CREATE TABLE Partida_Logro (
+  id_partida INT NOT NULL,
+  id_logro INT NOT NULL,
+  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_partida, id_logro),
+  FOREIGN KEY (id_partida) REFERENCES Partida(id_partida) ON DELETE CASCADE,
+  FOREIGN KEY (id_logro) REFERENCES Logro(id_logro) ON DELETE CASCADE
 );
 
 CREATE TABLE Partida_Personaje (
@@ -179,14 +211,50 @@ CREATE TABLE Partida_Personaje_Estado (
   FOREIGN KEY (id_estado) REFERENCES Estado(id_estado) ON DELETE CASCADE
 );
 
-SELECT * FROM Armas;
-SELECT * FROM Hechizos;
-SELECT * FROM Estado;
+-- CONSULTAS PARA LA DEMOSTRACION
+
+-- Enseñar personajes principales
 SELECT * FROM Personaje;
+
+-- Enseñar dificultades
 SELECT * FROM Dificultad;
 
+-- Enseñar logros disponibles
+SELECT * FROM Logro;
 
+-- Enseñar partidas guardadas
+SELECT * FROM Partida;
 
-SELECT *
-FROM Partida
-WHERE id_partida = 200;
+-- Enseñar todos los personajes guardados de una partida
+-- Cambiar el id 44 por el id de la partida que se quiera enseñar
+SELECT p.nombre, pp.turno, pp.vida_actual, pp.mana_actual, pp.estaVivo, pp.equipo
+FROM Partida_Personaje pp
+JOIN Personaje p ON pp.id_personaje = p.id_personaje
+WHERE pp.id_partida = 44
+ORDER BY pp.turno, pp.equipo, p.nombre;
+
+-- Enseñar solo el ultimo turno guardado de una partida
+-- Cambiar el id 44 por el id de la partida que se quiera enseñar
+SELECT p.nombre, pp.turno, pp.vida_actual, pp.mana_actual, pp.estaVivo, pp.equipo
+FROM Partida_Personaje pp
+JOIN Personaje p ON pp.id_personaje = p.id_personaje
+WHERE pp.id_partida = 44
+AND pp.turno = (
+  SELECT MAX(turno)
+  FROM Partida_Personaje
+  WHERE id_partida = 44
+)
+ORDER BY pp.equipo, p.nombre;
+
+-- Enseñar logros desbloqueados de una partida
+-- Cambiar el id 44 por el id de la partida que se quiera enseñar
+SELECT l.nombre, l.descripcion, pl.fecha
+FROM Partida_Logro pl
+JOIN Logro l ON pl.id_logro = l.id_logro
+WHERE pl.id_partida = 44
+ORDER BY pl.fecha;
+
+-- Enseñar ranking de personajes
+SELECT nombre, tipo, nivel, experiencia, victorias, derrotas
+FROM Personaje
+ORDER BY victorias DESC, experiencia DESC, nivel DESC;
