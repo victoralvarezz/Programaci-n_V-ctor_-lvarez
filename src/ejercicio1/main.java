@@ -49,41 +49,51 @@ public class main {
 		System.out.println("4) Borrar partida guardada");
 		System.out.println("5) Ver logros de una partida");
 		System.out.println("6) Ver ranking");
-		System.out.println("7) Salir");
+		System.out.println("7) Ver graficos");
+		System.out.println("8) Salir");
 
-		int opcionInicio = leerEntero(1, 7);
+		int opcionInicio = leerEntero(1, 8);
 
 		if (opcionInicio == 2) {
-			cargarPartidaGuardada();
+			MenuPartidas.cargarPartida(sc);
 			sc.close();
 			return;
 		}
 
 		if (opcionInicio == 3) {
-			listarPartidasGuardadas();
+			MenuPartidas.listarPartidas();
 			sc.close();
 			return;
 		}
 
 		if (opcionInicio == 4) {
-			borrarPartidaGuardada();
+			MenuPartidas.borrarPartida(sc);
 			sc.close();
 			return;
 		}
 
 		if (opcionInicio == 5) {
-			verLogrosPartida();
+			// Llamamos al menu de logros
+			MenuLogros.verLogros(sc);
 			sc.close();
 			return;
 		}
 
 		if (opcionInicio == 6) {
-			verRanking();
+			// Llamamos al ranking
+			MenuRanking.verRanking();
 			sc.close();
 			return;
 		}
 
 		if (opcionInicio == 7) {
+			// Llamamos al menu de graficos
+			MenuGraficos.verGraficos(sc);
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 8) {
 			System.out.println("Hasta luego.");
 			sc.close();
 			return;
@@ -255,150 +265,6 @@ public class main {
 						+ (p.estaVivo() ? "VIVO" : "ELIMINADO"));
 
 		sc.close();
-	}
-
-	/**
-	 * Lista las partidas guardadas.
-	 *
-	 * @return lista de partidas guardadas
-	 */
-	private static List<List<Object>> listarPartidasGuardadas() {
-		// Listamos las partidas guardadas
-		List<List<Object>> partidas = GestorPartidas.listarPartidas();
-
-		for (int i = 0; i < partidas.size(); i++) {
-			List<Object> partida = partidas.get(i);
-			System.out.println("Partida: " + partida.get(0));
-			System.out.println("Rondas guardadas: " + partida.get(1));
-			System.out.println("Ronda actual: " + partida.get(2));
-			System.out.println("Final del turno: " + partida.get(3));
-			System.out.println("Dificultad: " + partida.get(4));
-			System.out.println("--------------------");
-		}
-
-		return partidas;
-	}
-
-	/**
-	 * Carga una partida guardada y muestra sus personajes.
-	 */
-	private static void cargarPartidaGuardada() {
-		// Cargamos una partida guardada
-		List<List<Object>> partidas = listarPartidasGuardadas();
-
-		if (partidas.size() == 0) {
-			System.out.println("No hay partidas guardadas.");
-			return;
-		}
-
-		System.out.println("Introduce id de partida a cargar:");
-		int idPartida = leerEntero(1, 9999);
-		int turno = -1;
-
-		for (int i = 0; i < partidas.size(); i++) {
-			List<Object> partida = partidas.get(i);
-			int idGuardado = Integer.parseInt(String.valueOf(partida.get(0)));
-
-			if (idGuardado == idPartida) {
-				turno = Integer.parseInt(String.valueOf(partida.get(2)));
-			}
-		}
-
-		if (turno == -1) {
-			System.out.println("No existe esa partida.");
-			return;
-		}
-
-		List<List<Object>> personajes = GestorPartidas.cargarTurno(idPartida, turno);
-
-		// Mostramos los personajes cargados
-		for (int i = 0; i < personajes.size(); i++) {
-			List<Object> personaje = personajes.get(i);
-			System.out.println("Nombre: " + personaje.get(0));
-			System.out.println("Tipo: " + personaje.get(1));
-			System.out.println("Turno: " + personaje.get(2));
-			System.out.println("Vida actual: " + personaje.get(3));
-			System.out.println("Mana actual: " + personaje.get(4));
-			System.out.println("Esta vivo: " + personaje.get(5));
-			System.out.println("Equipo: " + personaje.get(6));
-			System.out.println("--------------------");
-		}
-	}
-
-	/**
-	 * Borra una partida guardada.
-	 */
-	private static void borrarPartidaGuardada() {
-		// Borramos una partida guardada
-		List<List<Object>> partidas = listarPartidasGuardadas();
-
-		if (partidas.size() == 0) {
-			System.out.println("No hay partidas guardadas.");
-			return;
-		}
-
-		System.out.println("Introduce id de partida a borrar:");
-		int idPartida = leerEntero(1, 9999);
-
-		GestorPartidas.borrarPartida(idPartida);
-		System.out.println("Partida borrada.");
-	}
-
-	/**
-	 * Muestra los logros de una partida.
-	 */
-	private static void verLogrosPartida() {
-		System.out.println("=== LOGROS DISPONIBLES ===");
-		List<List<Object>> todosLogros = GestorLogros.listarTodosLogros();
-
-		// Mostramos todos los logros disponibles
-		for (int i = 0; i < todosLogros.size(); i++) {
-			List<Object> logro = todosLogros.get(i);
-			System.out.println("Logro: " + logro.get(1));
-			System.out.println("Descripcion: " + logro.get(2));
-			System.out.println("--------------------");
-		}
-
-		listarPartidasGuardadas();
-
-		System.out.println("Introduce id de partida para ver sus logros desbloqueados:");
-		int idPartida = leerEntero(1, 9999);
-
-		List<List<Object>> logros = GestorLogros.listarLogrosPartida(idPartida);
-
-		if (logros.size() == 0) {
-			System.out.println("No hay logros desbloqueados para esta partida.");
-			return;
-		}
-
-		// Mostramos los logros desbloqueados de la partida
-		for (int i = 0; i < logros.size(); i++) {
-			List<Object> logro = logros.get(i);
-			System.out.println("Logro: " + logro.get(0));
-			System.out.println("Descripcion: " + logro.get(1));
-			System.out.println("Fecha: " + logro.get(2));
-			System.out.println("--------------------");
-		}
-	}
-
-	/**
-	 * Muestra el ranking de personajes.
-	 */
-	private static void verRanking() {
-		System.out.println("=== RANKING DE PERSONAJES ===");
-		List<List<Object>> ranking = GestorPartidas.listarRanking();
-
-		// Mostramos el ranking de personajes
-		for (int i = 0; i < ranking.size(); i++) {
-			List<Object> personaje = ranking.get(i);
-			System.out.println("Nombre: " + personaje.get(0));
-			System.out.println("Tipo: " + personaje.get(1));
-			System.out.println("Nivel: " + personaje.get(2));
-			System.out.println("Experiencia: " + personaje.get(3));
-			System.out.println("Victorias: " + personaje.get(4));
-			System.out.println("Derrotas: " + personaje.get(5));
-			System.out.println("--------------------");
-		}
 	}
 
 	/**
