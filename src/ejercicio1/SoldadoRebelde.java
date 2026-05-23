@@ -1,5 +1,7 @@
 package ejercicio1;
 
+import java.util.Scanner;
+
 /**
  * SoldadoRebelde: vida 110, ataque 22, defensa 4, mana 20. Arma: Blaster.
  */
@@ -20,7 +22,7 @@ public class SoldadoRebelde extends persona.Personaje {
 	 *
 	 * @param obj personaje enemigo objetivo
 	 */
-	public void usarVeneno(persona.Personaje obj) {
+	private void usarVeneno(persona.Personaje obj) {
 		if (mana >= 10) {
 			mana -= 10;
 			new hechizos.LanzarVeneno().lanzar(this, new persona.Personaje[] { obj });
@@ -43,5 +45,27 @@ public class SoldadoRebelde extends persona.Personaje {
 		if (atacarSiNoHayMana(obj, 10))
 			return;
 		usarVeneno(obj);
+	}
+
+	/**
+	 * Turno manual del Soldado Rebelde.
+	 *
+	 * @param enemigos array del equipo enemigo
+	 * @param aliados  array del equipo aliado
+	 * @param sc       scanner para leer la opcion
+	 */
+	@Override
+	public void turnoManual(persona.Personaje[] enemigos, persona.Personaje[] aliados, Scanner sc) {
+		// Turno manual del Soldado Rebelde
+		// Mostramos solo sus habilidades
+		System.out.println("1) Ataque basico");
+		System.out.println("2) Veneno");
+		int op = leerEntero(sc, 1, 2);
+
+		// Usamos la habilidad elegida
+		if (op == 1)
+			ataqueBasico(elegirObjetivo(enemigos, sc));
+		else
+			usarVeneno(elegirObjetivo(enemigos, sc));
 	}
 }

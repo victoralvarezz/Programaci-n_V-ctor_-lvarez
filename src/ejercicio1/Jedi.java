@@ -1,5 +1,7 @@
 package ejercicio1;
 
+import java.util.Scanner;
+
 /**
  * Jedi: vida 130, ataque 24, defensa 8, mana 20. Arma: SableLuz. Hechizos:
  * Empujon, Aplastamiento, Telequinesis.
@@ -21,7 +23,7 @@ public class Jedi extends persona.Personaje {
 	 *
 	 * @param enemigos array de personajes enemigos
 	 */
-	public void usarEmpujon(persona.Personaje[] enemigos) {
+	private void usarEmpujon(persona.Personaje[] enemigos) {
 		if (mana >= 10) {
 			mana -= 10;
 			new hechizos.EmpujonFuerza().lanzar(this, enemigos);
@@ -35,7 +37,7 @@ public class Jedi extends persona.Personaje {
 	 *
 	 * @param obj personaje enemigo objetivo
 	 */
-	public void usarAplastamiento(persona.Personaje obj) {
+	private void usarAplastamiento(persona.Personaje obj) {
 		if (mana >= 10) {
 			mana -= 10;
 			new hechizos.Aplastamiento().lanzar(this, new persona.Personaje[] { obj });
@@ -49,7 +51,7 @@ public class Jedi extends persona.Personaje {
 	 *
 	 * @param obj personaje enemigo objetivo
 	 */
-	public void usarTelequinesis(persona.Personaje obj) {
+	private void usarTelequinesis(persona.Personaje obj) {
 		if (mana >= 8) {
 			mana -= 8;
 			new hechizos.Telequinesis().lanzar(this, new persona.Personaje[] { obj });
@@ -80,6 +82,34 @@ public class Jedi extends persona.Personaje {
 			usarTelequinesis(obj);
 		else
 			ataqueBasico(obj);
+	}
+
+	/**
+	 * Turno manual del Jedi.
+	 *
+	 * @param enemigos array del equipo enemigo
+	 * @param aliados  array del equipo aliado
+	 * @param sc       scanner para leer la opcion
+	 */
+	@Override
+	public void turnoManual(persona.Personaje[] enemigos, persona.Personaje[] aliados, Scanner sc) {
+		// Turno manual del Jedi
+		// Mostramos solo sus habilidades
+		System.out.println("1) Ataque basico");
+		System.out.println("2) Empujon de la Fuerza");
+		System.out.println("3) Aplastamiento");
+		System.out.println("4) Telequinesis");
+		int op = leerEntero(sc, 1, 4);
+
+		// Usamos la habilidad elegida
+		if (op == 1)
+			ataqueBasico(elegirObjetivo(enemigos, sc));
+		else if (op == 2)
+			usarEmpujon(enemigos);
+		else if (op == 3)
+			usarAplastamiento(elegirObjetivo(enemigos, sc));
+		else
+			usarTelequinesis(elegirObjetivo(enemigos, sc));
 	}
 
 }

@@ -1,5 +1,7 @@
 package ejercicio1;
 
+import java.util.Scanner;
+
 /**
  * Sith: vida 130, ataque 26, defensa 7, mana 25. Arma: SableLuz. Hechizos:
  * Empujon, Aplastamiento, Estrangulamiento.
@@ -21,7 +23,7 @@ public class Sith extends persona.Personaje {
 	 *
 	 * @param enemigos array de personajes enemigos
 	 */
-	public void usarEmpujon(persona.Personaje[] enemigos) {
+	private void usarEmpujon(persona.Personaje[] enemigos) {
 		if (mana >= 10) {
 			mana -= 10;
 			new hechizos.EmpujonFuerza().lanzar(this, enemigos);
@@ -35,7 +37,7 @@ public class Sith extends persona.Personaje {
 	 *
 	 * @param obj personaje enemigo objetivo
 	 */
-	public void usarAplastamiento(persona.Personaje obj) {
+	private void usarAplastamiento(persona.Personaje obj) {
 		if (mana >= 10) {
 			mana -= 10;
 			new hechizos.Aplastamiento().lanzar(this, new persona.Personaje[] { obj });
@@ -49,7 +51,7 @@ public class Sith extends persona.Personaje {
 	 *
 	 * @param obj personaje enemigo objetivo
 	 */
-	public void usarEstrangulamiento(persona.Personaje obj) {
+	private void usarEstrangulamiento(persona.Personaje obj) {
 		if (mana >= 12) {
 			mana -= 12;
 			new hechizos.Estrangulamiento().lanzar(this, new persona.Personaje[] { obj });
@@ -80,5 +82,33 @@ public class Sith extends persona.Personaje {
 			usarEstrangulamiento(obj);
 		else
 			ataqueBasico(obj);
+	}
+
+	/**
+	 * Turno manual del Sith.
+	 *
+	 * @param enemigos array del equipo enemigo
+	 * @param aliados  array del equipo aliado
+	 * @param sc       scanner para leer la opcion
+	 */
+	@Override
+	public void turnoManual(persona.Personaje[] enemigos, persona.Personaje[] aliados, Scanner sc) {
+		// Turno manual del Sith
+		// Mostramos solo sus habilidades
+		System.out.println("1) Ataque basico");
+		System.out.println("2) Empujon de la Fuerza");
+		System.out.println("3) Aplastamiento");
+		System.out.println("4) Estrangulamiento");
+		int op = leerEntero(sc, 1, 4);
+
+		// Usamos la habilidad elegida
+		if (op == 1)
+			ataqueBasico(elegirObjetivo(enemigos, sc));
+		else if (op == 2)
+			usarEmpujon(enemigos);
+		else if (op == 3)
+			usarAplastamiento(elegirObjetivo(enemigos, sc));
+		else
+			usarEstrangulamiento(elegirObjetivo(enemigos, sc));
 	}
 }

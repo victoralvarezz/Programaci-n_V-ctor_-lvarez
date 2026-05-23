@@ -1,5 +1,7 @@
 package ejercicio1;
 
+import java.util.Scanner;
+
 /**
  * Clase contenedora de todas las clases de personaje del juego. Contiene la
  * clase abstracta base Personaje y varias subclases: Sith, SoldadoRebelde,
@@ -139,6 +141,7 @@ public class persona {
 		 */
 		protected boolean atacarSiNoHayMana(Personaje obj, int manaMinimo) {
 			if (mana < manaMinimo) {
+				// Si no hay mana suficiente, ataca normal
 				ataqueBasico(obj);
 				return true;
 			}
@@ -244,6 +247,62 @@ public class persona {
 			System.out.println(nombre + " ataca a " + obj.nombre);
 			obj.recibirDanio(danio);
 			System.out.println("   -> " + obj.nombre + " queda con vida " + obj.vida);
+		}
+
+		/**
+		 * Turno manual por defecto: ataque basico.
+		 *
+		 * @param enemigos array del equipo enemigo
+		 * @param aliados  array del equipo aliado
+		 * @param sc       scanner para leer la opcion del jugador
+		 */
+		public void turnoManual(Personaje[] enemigos, Personaje[] aliados, Scanner sc) {
+			System.out.println("1) Ataque basico");
+			ataqueBasico(elegirObjetivo(enemigos, sc));
+		}
+
+		/**
+		 * Permite elegir un objetivo vivo del equipo indicado.
+		 *
+		 * @param equipo array del equipo del que se elige objetivo
+		 * @param sc     scanner para leer la opcion del jugador
+		 * @return personaje vivo seleccionado
+		 */
+		protected Personaje elegirObjetivo(Personaje[] equipo, Scanner sc) {
+			// Elegimos el objetivo
+			System.out.println("Elige objetivo:");
+			for (int i = 0; i < equipo.length; i++) {
+				if (equipo[i] != null && equipo[i].estaVivo())
+					System.out.println((i + 1) + ") " + equipo[i].nombre + " (" + equipo[i].vida + " vida)");
+				else
+					System.out.println((i + 1) + ") [ELIMINADO]");
+			}
+			while (true) {
+				int op = leerEntero(sc, 1, equipo.length);
+				if (equipo[op - 1] != null && equipo[op - 1].estaVivo())
+					return equipo[op - 1];
+				System.out.println("Ese objetivo no vale.");
+			}
+		}
+
+		/**
+		 * Lee un entero por consola dentro del rango indicado.
+		 *
+		 * @param sc  scanner para leer la opcion
+		 * @param min valor minimo aceptado
+		 * @param max valor maximo aceptado
+		 * @return entero valido
+		 */
+		protected int leerEntero(Scanner sc, int min, int max) {
+			while (true) {
+				try {
+					int n = Integer.parseInt(sc.nextLine());
+					if (n >= min && n <= max)
+						return n;
+				} catch (Exception e) {
+				}
+				System.out.print("Numero incorrecto: ");
+			}
 		}
 
 		/**
