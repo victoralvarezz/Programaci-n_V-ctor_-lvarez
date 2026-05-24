@@ -28,7 +28,7 @@ public class GestorLogros {
 		// Cogemos los datos del logro.
 		parametrosLogro.add(idLogro);
 		List<List<Object>> datosLogro = Utils.selectData(sqlLogro, parametrosLogro);
-
+		//“Si no existe ese logro, no hagas nada y sal del método.”
 		if (datosLogro.size() == 0) {
 			return;
 		}

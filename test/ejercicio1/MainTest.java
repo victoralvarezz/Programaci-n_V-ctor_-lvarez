@@ -102,7 +102,7 @@ class MainTest {
 		// Comprobamos el resultado
 		assertEquals(0, sith.vida);
 	}
-
+// comprueba que cuando la vida queda en 0, estaVivo() devuelve false.
 	@Test
 	void estaVivoDevuelveFalseCuandoElPersonajeMuere() {
 		// Creamos personaje
@@ -128,5 +128,60 @@ class MainTest {
 
 		// Comprobamos el resultado
 		assertTrue(jedi.estaVivo());
+	}
+
+	@Test
+	void curarNoSuperaVidaMaxima() {
+		// Creamos personaje
+		Jedi jedi = new Jedi("Yoda");
+
+		// Hacemos danio y curamos mucho
+		jedi.recibirDanioDirecto(20);
+		jedi.curar(999);
+
+		// Comprobamos el resultado
+		assertEquals(jedi.vidaMax, jedi.vida);
+	}
+
+	@Test
+	void regenerarManaNoSuperaManaMaximo() {
+		// Creamos personaje
+		Jedi jedi = new Jedi("Yoda");
+
+		// Ponemos el mana cerca del maximo
+		jedi.mana = jedi.manaMax - 1;
+		jedi.regenerarMana();
+
+		// Comprobamos el resultado
+		assertEquals(jedi.manaMax, jedi.mana);
+	}
+
+	@Test
+	void aplicarEstadoAnadeUnEstado() {
+		// Creamos personaje
+		Jedi jedi = new Jedi("Yoda");
+
+		// Aplicamos un estado
+		jedi.aplicarEstado(new Veneno());
+
+		// Comprobamos el resultado
+		assertEquals(1, jedi.numEstados);
+		assertTrue(jedi.estados[0] != null);
+	}
+
+	@Test
+	void procesarEstadosReduceTurnosDelEstado() {
+		// Creamos personaje
+		Jedi jedi = new Jedi("Yoda");
+
+		// Aplicamos un estado
+		jedi.aplicarEstado(new Veneno());
+		int turnosAntes = jedi.estados[0].getTurnosRestantes();
+
+		// Procesamos estados
+		jedi.procesarEstados();
+
+		// Comprobamos el resultado
+		assertTrue(jedi.numEstados == 0 || jedi.estados[0].getTurnosRestantes() < turnosAntes);
 	}
 }

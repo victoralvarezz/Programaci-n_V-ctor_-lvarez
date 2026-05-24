@@ -1,22 +1,6 @@
 CREATE DATABASE IF NOT EXISTS starwars_rpg;
 USE starwars_rpg;
 
--- Borramos las tablas si ya existen para poder ejecutar el script varias veces sin errores
-DROP TABLE IF EXISTS Partida_Personaje_Estado;
-DROP TABLE IF EXISTS Partida_Logro;
-DROP TABLE IF EXISTS Partida_Personaje;
-DROP TABLE IF EXISTS Partida;
-DROP TABLE IF EXISTS Combate;
-DROP TABLE IF EXISTS Personaje_Estado;
-DROP TABLE IF EXISTS Aplica_Estado;
-DROP TABLE IF EXISTS Lanza;
-DROP TABLE IF EXISTS Personaje;
-DROP TABLE IF EXISTS Dificultad;
-DROP TABLE IF EXISTS Estado;
-DROP TABLE IF EXISTS Hechizos;
-DROP TABLE IF EXISTS Armas;
-DROP TABLE IF EXISTS Logro;
-
 -- Tabla de armas
 CREATE TABLE Armas (
   id_arma INT PRIMARY KEY,
