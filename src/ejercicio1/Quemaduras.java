@@ -1,41 +1,33 @@
 package ejercicio1;
 
 /**
- * Estado de daño por turnos que representa fuego. Aplica 5 puntos de daño
- * directo a la vida durante 3 turnos. Este daño no pasa por la defensa del
- * personaje. Se aplica al final de cada ronda en la fase de estados.
- *
- * @author Victor
- * @version 1.0
+ * Estado de danio por turnos que representa fuego.
  */
 public class Quemaduras extends Estado {
 
-	/**
-	 * Crea el estado Quemadura con 5 de daño durante 3 turnos.
-	 */
+	// Guarda cuanto danio hace la quemadura en cada turno.
+	private int danioPorTurno;
+
+	// Crea un estado de quemadura que dura 3 turnos.
 	public Quemaduras() {
-		super("Quemadura", 5, 3);
+		// Llama al constructor de Estado para guardar el nombre y la duracion.
+		super("Quemadura", 3);
+		this.danioPorTurno = 5;
 	}
 
-	/**
-	 * Aplica el daño de la quemadura directamente sobre la vida del objetivo. Si el
-	 * objetivo ya esta muerto no hace nada. Decrementa turnosRestantes al final.
-	 *
-	 * @param objetivo el personaje que sufre la quemadura
-	 */
+	// Aplica el efecto de la quemadura sobre el personaje.
 	@Override
-	public void aplicarEfecto(persona.Personaje objetivo) {
-		if (!objetivo.estaVivo())
+	public void aplicar(persona.Personaje objetivo) {
+		// Si el estado ya no esta activo o el personaje esta muerto, no hace nada.
+		if (!estaActivo() || !objetivo.estaVivo())
 			return;
 
-		objetivo.vida -= potenciaPorTurno;
+		// Aplica el danio directo, sin tener en cuenta la defensa.
+		objetivo.recibirDanioDirecto(danioPorTurno);
 
-		if (objetivo.vida < 0)
-			objetivo.vida = 0;
+		System.out.println("  [Quemadura] " + objetivo.getNombre() + " sufre " + danioPorTurno + " de danio");
 
-		System.out.println("  [Quemadura] " + objetivo.nombre + " sufre " + potenciaPorTurno + " de daño | Vida: "
-				+ objetivo.vida);
-
-		turnosRestantes--;
+		// Despues de aplicarse, se reduce un turno de duracion.
+		reducirTurno();
 	}
 }

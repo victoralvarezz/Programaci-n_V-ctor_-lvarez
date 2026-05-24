@@ -10,11 +10,16 @@ package ejercicio1;
  */
 public class Senadora extends Estado {
 
+	// Guarda cuanta vida recupera el estado en cada turno.
+	private int curacionPorTurno;
+
 	/**
 	 * Crea el estado Renovar con 10 de curacion durante 2 turnos.
 	 */
 	public Senadora() {
-		super("Renovar", 10, 2);
+		// Llama al constructor de Estado para guardar el nombre y la duracion.
+		super("Renovar", 2);
+		this.curacionPorTurno = 10;
 	}
 
 	/**
@@ -25,18 +30,17 @@ public class Senadora extends Estado {
 	 * @param objetivo el personaje que recibe la curacion
 	 */
 	@Override
-	public void aplicarEfecto(persona.Personaje objetivo) {
-		if (!objetivo.estaVivo())
+	public void aplicar(persona.Personaje objetivo) {
+		// Si el estado ya no esta activo o el personaje esta muerto, no hace nada.
+		if (!estaActivo() || !objetivo.estaVivo())
 			return;
 
-		objetivo.vida += potenciaPorTurno;
+		// Aplica la curacion sin superar la vida maxima del personaje.
+		objetivo.curar(curacionPorTurno);
 
-		if (objetivo.vida > objetivo.vidaMax)
-			objetivo.vida = objetivo.vidaMax;
+		System.out.println("  [Renovar] " + objetivo.getNombre() + " recupera " + curacionPorTurno + " de vida");
 
-		System.out.println("  [Renovar] " + objetivo.nombre + " recupera " + potenciaPorTurno + " de vida | Vida: "
-				+ objetivo.vida);
-
-		turnosRestantes--;
+		// Despues de aplicarse, se reduce un turno de duracion.
+		reducirTurno();
 	}
 }

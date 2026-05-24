@@ -1,6 +1,11 @@
 package ejercicio1;
 
+import BBDD.GestorLogros;
+import BBDD.GestorPartidas;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -10,7 +15,7 @@ import java.util.Scanner;
  * de la partida. Usa un HashMap para el catalogo de personajes disponibles.
  *
  * @author Victor
- * @version 1.0 
+ * @version 1.0
  */
 public class main {
 
@@ -38,16 +43,68 @@ public class main {
 	public static void main(String[] args) {
 
 		System.out.println("=== RPG POR TURNOS ===");
-		System.out.println("1) Iniciar combate");
-		System.out.println("2) Salir");
+		System.out.println("1) Nueva partida");
+		System.out.println("2) Cargar partida guardada");
+		System.out.println("3) Listar partidas guardadas");
+		System.out.println("4) Borrar partida guardada");
+		System.out.println("5) Ver logros de una partida");
+		System.out.println("6) Ver ranking");
+		System.out.println("7) Ver graficos");
+		System.out.println("8) Salir");
 
-		int opcionInicio = leerEntero(1, 2);
+		int opcionInicio = leerEntero(1, 8);
 
 		if (opcionInicio == 2) {
+			MenuPartidas.cargarPartida(sc);
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 3) {
+			MenuPartidas.listarPartidas();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 4) {
+			MenuPartidas.borrarPartida(sc);
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 5) {
+			// Llamamos al menu de logros
+			MenuLogros.verLogros(sc);
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 6) {
+			// Llamamos al ranking
+			MenuRanking.verRanking();
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 7) {
+			// Llamamos al menu de graficos
+			MenuGraficos.verGraficos(sc);
+			sc.close();
+			return;
+		}
+
+		if (opcionInicio == 8) {
 			System.out.println("Hasta luego.");
 			sc.close();
 			return;
 		}
+
+		System.out.println("\nElige dificultad:");
+		System.out.println("1) Facil");
+		System.out.println("2) Normal");
+		System.out.println("3) Dificil");
+
+		int dificultad = leerEntero(1, 3);
 
 		System.out.println("\nElige modo:");
 		System.out.println("1) Combate automatico");
@@ -55,25 +112,54 @@ public class main {
 
 		int modo = leerEntero(1, 2);
 
+		// Preguntamos si quiere guardar la partida
+		System.out.println("\n¿Quieres guardar esta partida?");
+		System.out.println("1) Si");
+		System.out.println("2) No");
+		int opcionGuardar = leerEntero(1, 2);
+		boolean guardarPartida = opcionGuardar == 1;
+		int idPartida = -1;
+
+		if (guardarPartida) {
+			System.out.println("\nIntroduce id para guardar esta partida:");
+			// Pedimos el id de la partida
+			idPartida = leerEntero(1, 9999);
+		}
+
 		persona.Personaje[] equipoA;
 		persona.Personaje[] equipoB;
 
 		if (modo == 1) {
-			equipoA = new persona.Personaje[] { new persona.Jedi("Yoda"), new persona.SoldadoRebelde("Han Solo"),
-					new persona.Sanador("Leia") };
-			equipoB = new persona.Personaje[] { new persona.Sith("Darth Vader"),
-					new persona.SoldadoImperial("Stormtrooper"), new persona.Cazarrecompensas("Boba Fett") };
+			equipoA = new persona.Personaje[] { new Jedi("Yoda"), new SoldadoRebelde("Han Solo"), new Sanador("Leia") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"), new SoldadoImperial("Stormtrooper"),
+					new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo A: Yoda / Han Solo / Leia");
 			System.out.println("Equipo B: Darth Vader / Stormtrooper / Boba Fett");
 		} else {
 			System.out.println("\n=== ELIGE TU EQUIPO ===");
 			equipoA = elegirEquipo("Tu equipo");
-			equipoB = new persona.Personaje[] { new persona.Sith("Darth Vader"),
-					new persona.SoldadoImperial("Stormtrooper"), new persona.Cazarrecompensas("Boba Fett") };
+			equipoB = new persona.Personaje[] { new Sith("Darth Vader"), new SoldadoImperial("Stormtrooper"),
+					new Cazarrecompensas("Boba Fett") };
 			System.out.println("\nEquipo enemigo: Darth Vader / Stormtrooper / Boba Fett");
 		}
 
+		aplicarDificultad(equipoB, dificultad);
+
 		int ronda = 1;
+
+		// Solo guardamos si el usuario quiere
+		if (guardarPartida) {
+			// Creamos la partida en la base de datos
+			GestorPartidas.borrarPartida(idPartida);
+			GestorPartidas.crearPartida(idPartida, dificultad);
+
+			// Guardamos los equipos al empezar
+			guardarEquipoPartida(equipoA, idPartida, 0, "Jugador");
+			guardarEquipoPartida(equipoB, idPartida, 0, "Enemigo");
+			GestorPartidas.actualizarPartida(idPartida, 0, 0, true);
+			GestorLogros.desbloquearLogro(idPartida, 1);
+		}
+
 		System.out.println("\n=== COMBATE INICIADO ===");
 
 		while (hayVivos(equipoA) && hayVivos(equipoB)) {
@@ -102,8 +188,18 @@ public class main {
 				}
 			}
 
-			if (!hayVivos(equipoB))
+			if (!hayVivos(equipoB)) {
+				// Solo guardamos si el usuario quiere
+				if (guardarPartida) {
+					// Guardamos la ronda actual
+					guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+					guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+					GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+					if (hayMuertos(equipoB))
+						GestorLogros.desbloquearLogro(idPartida, 4);
+				}
 				break;
+			}
 
 			System.out.println("\n-- Turno Equipo B --");
 			for (persona.Personaje p : equipoB) {
@@ -118,16 +214,42 @@ public class main {
 			procesarEquipo(equipoB);
 			sleep(1700);
 
+			// Solo guardamos si el usuario quiere
+			if (guardarPartida) {
+				// Guardamos la ronda actual
+				guardarEquipoPartida(equipoA, idPartida, ronda, "Jugador");
+				guardarEquipoPartida(equipoB, idPartida, ronda, "Enemigo");
+				GestorPartidas.actualizarPartida(idPartida, ronda, ronda, true);
+				if (hayMuertos(equipoB))
+					GestorLogros.desbloquearLogro(idPartida, 4);
+			}
+
 			ronda++;
 		}
 
 		System.out.println("\n=== FIN DEL COMBATE ===");
 
-		if (!hayVivos(equipoB) && hayVivos(equipoA))
+		if (!hayVivos(equipoB) && hayVivos(equipoA)) {
 			System.out.println("Gana el Equipo A");
-		else if (!hayVivos(equipoA) && hayVivos(equipoB))
+			if (guardarPartida) {
+				GestorLogros.desbloquearLogro(idPartida, 2);
+				GestorLogros.desbloquearLogro(idPartida, 3);
+				if (dificultad == 1)
+					GestorLogros.desbloquearLogro(idPartida, 5);
+				else if (dificultad == 2)
+					GestorLogros.desbloquearLogro(idPartida, 6);
+				else if (dificultad == 3)
+					GestorLogros.desbloquearLogro(idPartida, 7);
+				actualizarRankingEquipoGanador(equipoA, dificultad);
+				actualizarRankingEquipoPerdedor(equipoB);
+			}
+		} else if (!hayVivos(equipoA) && hayVivos(equipoB)) {
 			System.out.println("Gana el Equipo B");
-		else
+			if (guardarPartida) {
+				actualizarRankingEquipoGanador(equipoB, dificultad);
+				actualizarRankingEquipoPerdedor(equipoA);
+			}
+		} else
 			System.out.println("Empate");
 
 		System.out.println("\n--- Equipo A ---");
@@ -146,6 +268,108 @@ public class main {
 	}
 
 	/**
+	 * Guarda los personajes de un equipo en la partida.
+	 *
+	 * @param equipo       equipo que se va a guardar
+	 * @param idPartida    id de la partida
+	 * @param turno        ronda que se esta guardando
+	 * @param nombreEquipo nombre del equipo
+	 */
+	private static void guardarEquipoPartida(persona.Personaje[] equipo, int idPartida, int turno,
+			String nombreEquipo) {
+		for (persona.Personaje p : equipo) {
+			if (p != null) {
+				GestorPartidas.guardarPersonajePartida(idPartida, obtenerIdPersonaje(p), turno, p.vida, p.mana,
+						p.estaVivo(), nombreEquipo);
+			}
+		}
+	}
+
+	/**
+	 * Devuelve el id del personaje segun su nombre.
+	 *
+	 * @param p personaje del juego
+	 * @return id del personaje en la base de datos
+	 */
+	private static int obtenerIdPersonaje(persona.Personaje p) {
+		if (p.nombre.startsWith("Yoda"))
+			return 1;
+		if (p.nombre.startsWith("Darth Vader"))
+			return 2;
+		if (p.nombre.startsWith("Leia"))
+			return 3;
+		if (p.nombre.startsWith("Han Solo"))
+			return 4;
+		if (p.nombre.startsWith("Stormtrooper"))
+			return 5;
+		if (p.nombre.startsWith("Boba Fett"))
+			return 6;
+		return 0;
+	}
+
+	/**
+	 * Actualiza victorias y experiencia del equipo ganador.
+	 *
+	 * @param equipo     equipo ganador
+	 * @param dificultad dificultad de la partida
+	 */
+	private static void actualizarRankingEquipoGanador(persona.Personaje[] equipo, int dificultad) {
+		List<Integer> idsActualizados = new ArrayList<Integer>();
+		int experienciaGanada = obtenerExperienciaDificultad(dificultad);
+
+		// Actualizamos el ranking del equipo ganador
+		for (int i = 0; i < equipo.length; i++) {
+			if (equipo[i] != null) {
+				int idPersonaje = obtenerIdPersonaje(equipo[i]);
+
+				// Evitamos sumar dos veces el mismo personaje
+				if (idPersonaje != 0 && !idsActualizados.contains(idPersonaje)) {
+					// Sumamos victoria y experiencia
+					GestorPartidas.sumarVictoriaPersonaje(idPersonaje, experienciaGanada);
+					idsActualizados.add(idPersonaje);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Actualiza derrotas del equipo perdedor.
+	 *
+	 * @param equipo equipo perdedor
+	 */
+	private static void actualizarRankingEquipoPerdedor(persona.Personaje[] equipo) {
+		List<Integer> idsActualizados = new ArrayList<Integer>();
+
+		// Actualizamos derrotas del equipo perdedor
+		for (int i = 0; i < equipo.length; i++) {
+			if (equipo[i] != null) {
+				int idPersonaje = obtenerIdPersonaje(equipo[i]);
+
+				// Evitamos sumar dos veces el mismo personaje
+				if (idPersonaje != 0 && !idsActualizados.contains(idPersonaje)) {
+					// Sumamos derrota
+					GestorPartidas.sumarDerrotaPersonaje(idPersonaje);
+					idsActualizados.add(idPersonaje);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Devuelve la experiencia ganada segun la dificultad.
+	 *
+	 * @param dificultad dificultad elegida
+	 * @return experiencia ganada
+	 */
+	private static int obtenerExperienciaDificultad(int dificultad) {
+		if (dificultad == 1)
+			return 30;
+		if (dificultad == 2)
+			return 50;
+		return 80;
+	}
+
+	/**
 	 * Gestiona el turno manual del jugador mostrando las acciones disponibles segun
 	 * el tipo de personaje y pidiendo objetivo si es necesario.
 	 *
@@ -156,97 +380,7 @@ public class main {
 	private static void turnoJugador(persona.Personaje p, persona.Personaje[] enemigos, persona.Personaje[] aliados) {
 
 		System.out.println("\nTurno de " + p.nombre);
-
-		if (p instanceof persona.Jedi) {
-			System.out.println("1) Ataque basico");
-			System.out.println("2) Empujon Fuerza");
-			System.out.println("3) Aplastamiento");
-			System.out.println("4) Telequinesis");
-			int op = leerEntero(1, 4);
-			if (op == 1)
-				p.ataqueBasico(elegirObjetivo(enemigos));
-			else if (op == 2)
-				p.usarEmpujon(enemigos);
-			else if (op == 3)
-				p.usarAplastamiento(elegirObjetivo(enemigos));
-			else
-				p.usarTelequinesis(elegirObjetivo(enemigos));
-
-		} else if (p instanceof persona.Sith) {
-			System.out.println("1) Ataque basico");
-			System.out.println("2) Empujon Fuerza");
-			System.out.println("3) Aplastamiento");
-			System.out.println("4) Estrangulamiento");
-			int op = leerEntero(1, 4);
-			if (op == 1) {
-				persona.Personaje obj = elegirObjetivo(enemigos);
-				if (obj != null)
-					p.ataqueBasico(obj);
-			} else if (op == 2)
-				p.usarEmpujon(enemigos);
-			else if (op == 3) {
-				persona.Personaje obj = elegirObjetivo(enemigos);
-				if (obj != null)
-					p.usarAplastamiento(obj);
-			} else {
-				persona.Personaje obj = elegirObjetivo(enemigos);
-				if (obj != null)
-					p.usarEstrangulamiento(obj);
-			}
-
-		} else if (p instanceof persona.Cazarrecompensas) {
-			System.out.println("1) Ataque basico");
-			System.out.println("2) Quemadura");
-			int op = leerEntero(1, 2);
-			if (op == 1)
-				p.ataqueBasico(elegirObjetivo(enemigos));
-			else
-				p.usarQuemadura(elegirObjetivo(enemigos));
-
-		} else if (p instanceof persona.Sanador) {
-			System.out.println("1) Ataque basico");
-			System.out.println("2) Curacion");
-			System.out.println("3) Renovar");
-			int op = leerEntero(1, 3);
-			if (op == 1)
-				p.ataqueBasico(elegirObjetivo(enemigos));
-			else if (op == 2)
-				p.usarCuracion(elegirObjetivo(aliados));
-			else
-				p.usarRenovar(elegirObjetivo(aliados));
-
-		} else {
-			System.out.println("1) Ataque basico");
-			System.out.println("2) Granada venenosa");
-			int op = leerEntero(1, 2);
-			if (op == 1)
-				p.ataqueBasico(elegirObjetivo(enemigos));
-			else
-				p.usarVeneno(elegirObjetivo(enemigos));
-		}
-	}
-
-	/**
-	 * Muestra la lista de personajes vivos del equipo y devuelve el elegido. No
-	 * permite seleccionar personajes muertos.
-	 *
-	 * @param equipo array del equipo del que se elige objetivo
-	 * @return el personaje vivo seleccionado por el jugador
-	 */
-	private static persona.Personaje elegirObjetivo(persona.Personaje[] equipo) {
-		System.out.println("Elige objetivo:");
-		for (int i = 0; i < equipo.length; i++) {
-			if (equipo[i] != null && equipo[i].estaVivo())
-				System.out.println((i + 1) + ") " + equipo[i].nombre + " (" + equipo[i].vida + " vida)");
-			else
-				System.out.println((i + 1) + ") [ELIMINADO]");
-		}
-		while (true) {
-			int op = leerEntero(1, equipo.length);
-			if (equipo[op - 1] != null && equipo[op - 1].estaVivo())
-				return equipo[op - 1];
-			System.out.println("Ese objetivo no vale.");
-		}
+		p.turnoManual(enemigos, aliados, sc);
 	}
 
 	/**
@@ -306,16 +440,16 @@ public class main {
 	 */
 	private static persona.Personaje crearPersonaje(int tipo, String nombre) {
 		if (tipo == 1)
-			return new persona.Jedi(nombre);
+			return new Jedi(nombre);
 		if (tipo == 2)
-			return new persona.Sith(nombre);
+			return new Sith(nombre);
 		if (tipo == 3)
-			return new persona.SoldadoRebelde(nombre);
+			return new SoldadoRebelde(nombre);
 		if (tipo == 4)
-			return new persona.SoldadoImperial(nombre);
+			return new SoldadoImperial(nombre);
 		if (tipo == 5)
-			return new persona.Cazarrecompensas(nombre);
-		return new persona.Sanador(nombre);
+			return new Cazarrecompensas(nombre);
+		return new Sanador(nombre);
 	}
 
 	/**
@@ -345,6 +479,29 @@ public class main {
 	}
 
 	/**
+	 * Cambia las estadisticas del equipo enemigo segun la dificultad elegida.
+	 *
+	 * @param enemigos   equipo enemigo que se va a modificar
+	 * @param dificultad dificultad elegida por el jugador
+	 */
+	public static void aplicarDificultad(persona.Personaje[] enemigos, int dificultad) {
+		for (persona.Personaje enemigo : enemigos) {
+			if (enemigo != null) {
+				// Solo se cambian los enemigos para hacer el combate mas facil o dificil.
+				if (dificultad == 1) {
+					enemigo.vidaMax = Math.max(1, enemigo.vidaMax - 20);
+					enemigo.vida = Math.max(1, enemigo.vida - 20);
+					enemigo.ataque = Math.max(1, enemigo.ataque - 3);
+				} else if (dificultad == 3) {
+					enemigo.vidaMax = enemigo.vidaMax + 30;
+					enemigo.vida = enemigo.vida + 30;
+					enemigo.ataque = enemigo.ataque + 5;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Comprueba si algun personaje del equipo sigue vivo.
 	 *
 	 * @param equipo array del equipo a comprobar
@@ -354,6 +511,19 @@ public class main {
 	public static boolean hayVivos(persona.Personaje[] equipo) {
 		for (persona.Personaje p : equipo)
 			if (p != null && p.estaVivo())
+				return true;
+		return false;
+	}
+
+	/**
+	 * Comprueba si algun personaje del equipo esta muerto.
+	 *
+	 * @param equipo array del equipo a comprobar
+	 * @return true si hay algun personaje muerto
+	 */
+	public static boolean hayMuertos(persona.Personaje[] equipo) {
+		for (persona.Personaje p : equipo)
+			if (p != null && !p.estaVivo())
 				return true;
 		return false;
 	}
